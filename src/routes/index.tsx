@@ -1,14 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
+import DashboardPage from '../pages/dashboard/index'
 
-export const Route = createFileRoute('/' as any)({
-    component: Index,
+export const Route = createFileRoute('/')({
+    component: DashboardPage,
 })
 
-function Index() {
-    return (
-        <div className="p-2">
-            <h3 className="text-xl text-primary font-bold">Welcome to Budget Buddy!</h3>
-            <p>Your financial companion.</p>
-        </div>
-    )
-}
