@@ -1,0 +1,337 @@
+import { supabase, getDevUserId } from '../lib/supabase';
+import type { Category, Transaction, BudgetGoal } from '../types';
+import type { Database } from '../types/database.types';
+
+// Type helpers to convert database rows to app types
+type CategoryRow = Database['public']['Tables']['categories']['Row'];
+type TransactionRow = Database['public']['Tables']['transactions']['Row'];
+type BudgetRow = Database['public']['Tables']['budgets']['Row'];
+
+/**
+ * Convert database category to app Category type
+ */
+const mapCategory = (row: CategoryRow): Category => ({
+    id: row.id,
+    name: row.name,
+    type: row.type,
+    icon: row.icon || undefined,
+    color: row.color || undefined,
+    userId: row.user_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+});
+
+/**
+ * Convert database transaction to app Transaction type
+ */
+const mapTransaction = (row: TransactionRow): Transaction => ({
+    id: row.id,
+    amount: row.amount,
+    date: row.date,
+    description: row.description,
+    categoryId: row.category_id,
+    type: row.type,
+    isPaid: row.is_paid,
+    userId: row.user_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+});
+
+/**
+ * Convert database budget to app BudgetGoal type
+ */
+const mapBudget = (row: BudgetRow): BudgetGoal => ({
+    id: row.id,
+    categoryId: row.category_id,
+    amount: row.limit_amount,
+    month: row.month_year,
+    userId: row.user_id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+});
+
+/**
+ * Fetch all categories for the current user
+ */
+export const fetchCategories = async (): Promise<Category[]> => {
+    const userId = getDevUserId();
+
+    const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('user_id', userId)
+        .order('name', { ascending: true });
+
+    if (error) {
+        throw new Error(`Failed to fetch categories: ${error.message}`);
+    }
+
+    return (data || []).map(mapCategory);
+};
+
+/**
+ * Fetch all transactions for the current user
+ */
+export const fetchTransactions = async (): Promise<Transaction[]> => {
+    const userId = getDevUserId();
+
+    const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('date', { ascending: false });
+
+    if (error) {
+        throw new Error(`Failed to fetch transactions: ${error.message}`);
+    }
+
+    return (data || []).map(mapTransaction);
+};
+
+/**
+ * Fetch transactions filtered by month and type
+ */
+export const fetchTransactionsByMonth = async (
+    date: Date,
+    type?: Transaction['type']
+): Promise<Transaction[]> => {
+    const userId = getDevUserId();
+    const month = date.getMonth() + 1; // 1-indexed
+    const year = date.getFullYear();
+
+    // Calculate date range for the month
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+
+    // Calculate next month for upper bound
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const nextYear = month === 12 ? year + 1 : year;
+    const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
+
+    // Build query
+    let query = supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('date', startDate)
+        .lt('date', endDate);
+
+    if (type) {
+        query = query.eq('type', type);
+    }
+
+    const { data, error } = await query.order('date', { ascending: false });
+
+    if (error) {
+        throw new Error(`Failed to fetch transactions: ${error.message}`);
+    }
+
+    return (data || []).map(mapTransaction);
+};
+
+/**
+ * Fetch budget goals for the current user, optionally filtered by month
+ */
+export const fetchBudgets = async (date?: Date): Promise<BudgetGoal[]> => {
+    const userId = getDevUserId();
+
+    let query = supabase
+        .from('budgets')
+        .select('*')
+        .eq('user_id', userId);
+
+    if (date) {
+        // Filter by specific month
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
+        // Construct date string matching DB format (assuming YYYY-MM-DD for the first of the month)
+        const dateStr = `${year}-${String(month).padStart(2, '0')}-01`;
+        query = query.eq('month_year', dateStr);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+        throw new Error(`Failed to fetch budgets: ${error.message}`);
+    }
+
+    return (data || []).map(mapBudget);
+};
+
+/**
+ * Set the monthly variable budget (Managed via 'Groceries' category)
+ * Performs a manual upsert to avoid duplicates since there is no unique constraint
+ */
+export const setMonthlyVariableBudget = async (date: Date, amount: number): Promise<BudgetGoal> => {
+    const userId = getDevUserId();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-01`;
+    const GROCERIES_CATEGORY_ID = 'cat_groceries';
+
+    // 1. Check if a budget already exists for this month/category
+    const { data: existingData, error: fetchError } = await (supabase
+        .from('budgets') as any)
+        .select('*')
+        .eq('user_id', userId)
+        .eq('category_id', GROCERIES_CATEGORY_ID)
+        .eq('month_year', dateStr)
+        .maybeSingle();
+
+    if (fetchError) {
+        throw new Error(`Failed to check existing budget: ${fetchError.message}`);
+    }
+
+    const existing = existingData as BudgetRow | null;
+
+    let result: BudgetRow;
+
+    if (existing) {
+        // 2a. Update existing
+        const { data, error } = await (supabase
+            .from('budgets') as any)
+            .update({ limit_amount: amount })
+            .eq('id', existing.id)
+            .select()
+            .single();
+
+        if (error) throw new Error(`Failed to update budget: ${error.message}`);
+        result = data;
+    } else {
+        // 2b. Insert new
+        const { data, error } = await (supabase
+            .from('budgets') as any)
+            .insert({
+                user_id: userId,
+                category_id: GROCERIES_CATEGORY_ID,
+                month_year: dateStr,
+                limit_amount: amount
+            })
+            .select()
+            .single();
+
+        if (error) throw new Error(`Failed to create budget: ${error.message}`);
+        result = data;
+    }
+
+    return mapBudget(result);
+};
+
+/**
+ * Calculate dashboard stats from Supabase data
+ * Maintains same signature as mock version
+ */
+export const calculateDashboardStats = async (currentDate: Date) => {
+    const transactions = await fetchTransactionsByMonth(currentDate);
+
+    // Fetch budget for the specific month to get the variable limit (Groceries proxy)
+    const budgets = await fetchBudgets(currentDate);
+
+    const fixedTransactions = transactions.filter(tx => tx.type === 'fixed');
+    const variableTransactions = transactions.filter(tx => tx.type === 'variable');
+    const incomeTransactions = transactions.filter(tx => tx.type === 'income');
+
+    const totalFixed = fixedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+    const totalVariable = variableTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+    const totalIncome = incomeTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+
+    // Get the variable budget limit from the 'Groceries' category budget for this month
+    // If not found, default to 0
+    const variableBudgetLimit = budgets
+        .find(b => b.categoryId === 'cat_groceries')?.amount || 0;
+
+    const netCashFlow = totalIncome - (totalFixed + totalVariable);
+    const variablePercentage = variableBudgetLimit > 0
+        ? (totalVariable / variableBudgetLimit) * 100
+        : 0;
+
+    return {
+        totalIncome,
+        totalFixed,
+        totalVariable,
+        variableBudgetLimit,
+        netCashFlow,
+        variablePercentage,
+        fixedTransactions,
+        variableTransactions,
+    };
+};
+
+/**
+ * Create a new transaction
+ */
+export const createTransaction = async (
+    transaction: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+): Promise<Transaction> => {
+    const userId = getDevUserId();
+
+    const { data, error } = await (supabase
+        .from('transactions') as any)
+        .insert({
+            user_id: userId,
+            amount: transaction.amount,
+            date: transaction.date,
+            description: transaction.description,
+            category_id: transaction.categoryId,
+            type: transaction.type,
+            is_paid: transaction.isPaid,
+        })
+        .select()
+        .single();
+
+    if (error) {
+        throw new Error(`Failed to create transaction: ${error.message}`);
+    }
+
+    return mapTransaction(data as TransactionRow);
+};
+
+/**
+ * Update an existing transaction
+ */
+export const updateTransaction = async (
+    id: string,
+    updates: Partial<Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
+): Promise<Transaction> => {
+    const userId = getDevUserId();
+
+    type TransactionUpdate = Database['public']['Tables']['transactions']['Update'];
+    const updateData: TransactionUpdate = {};
+
+    if (updates.amount !== undefined) updateData.amount = updates.amount;
+    if (updates.date !== undefined) updateData.date = updates.date;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.categoryId !== undefined) updateData.category_id = updates.categoryId;
+    if (updates.type !== undefined) updateData.type = updates.type;
+    if (updates.isPaid !== undefined) updateData.is_paid = updates.isPaid;
+
+    const { data, error } = await (supabase
+        .from('transactions') as any)
+        .update(updateData)
+        .eq('id', id)
+        .eq('user_id', userId) // RLS check
+        .select()
+        .single();
+
+    if (error) {
+        throw new Error(`Failed to update transaction: ${error.message}`);
+    }
+
+    return mapTransaction(data as TransactionRow);
+};
+
+/**
+ * Delete a transaction
+ */
+export const deleteTransaction = async (id: string): Promise<void> => {
+    const userId = getDevUserId();
+
+    const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId); // RLS check
+
+    if (error) {
+        throw new Error(`Failed to delete transaction: ${error.message}`);
+    }
+};

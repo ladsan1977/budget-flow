@@ -1,23 +1,34 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
-import { CATEGORIES, VARIABLE_BUDGET_LIMIT, getTransactionsByMonth } from '../../services/mockData';
+import { useCategories } from '../../hooks/useCategories';
+import { useTransactionsByMonth } from '../../hooks/useTransactions';
+import { useVariableBudgetLimit } from '../../hooks/useBudgets';
+import { QueryErrorFallback } from '../../components/ui/QueryErrorFallback';
 import { formatCurrency, cn } from '../../lib/utils';
 import { Plus, X, Search, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
-import type { Transaction, TransactionType } from '../../types';
+import type { TransactionType } from '../../types';
 import { useDate } from '../../context/DateContext';
+
+import { useCreateTransaction } from '../../hooks/useTransactionMutations';
 
 export default function TransactionsPage() {
     const { currentDate } = useDate();
-    const [transactions, setTransactions] = useState<Transaction[]>(() => getTransactionsByMonth(currentDate));
+
+    // Server state is now sufficient since we invalidate queries on success
+    const { data: transactions = [], error, refetch } = useTransactionsByMonth();
+    const { data: categories = [] } = useCategories();
+    const { data: variableBudgetLimit = 0 } = useVariableBudgetLimit(currentDate);
+
+    const createMutation = useCreateTransaction();
+
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Update transactions when date context changes
-    useEffect(() => {
-        setTransactions(getTransactionsByMonth(currentDate));
-    }, [currentDate]);
+    if (error) {
+        return <QueryErrorFallback error={error} resetErrorBoundary={refetch} title="Failed to load transactions" />;
+    }
 
     // Form State
     const [description, setDescription] = useState('');
@@ -43,19 +54,19 @@ export default function TransactionsPage() {
     const handleSave = () => {
         if (!description || !amount || !categoryId) return;
 
-        const newTx: Transaction = {
-            id: `tx_${Date.now()}`,
+        createMutation.mutate({
             description,
             amount: parseFloat(amount),
             date,
             type,
             categoryId,
             isPaid,
-        };
-
-        setTransactions([newTx, ...transactions]); // Add to top
-        setIsModalOpen(false);
-        resetForm();
+        }, {
+            onSuccess: () => {
+                setIsModalOpen(false);
+                resetForm();
+            }
+        });
     };
 
     const resetForm = () => {
@@ -67,7 +78,9 @@ export default function TransactionsPage() {
         setIsPaid(false);
     };
 
-    const filteredCategories = CATEGORIES.filter(c => c.type === type);
+    const incomeCategories = categories.filter(c => c.type === 'income');
+    const fixedCategories = categories.filter(c => c.type === 'fixed');
+    const variableCategories = categories.filter(c => c.type === 'variable');
 
     const getBadgeVariant = (txType: TransactionType) => {
         switch (txType) {
@@ -122,7 +135,7 @@ export default function TransactionsPage() {
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                             {transactions.map((tx) => {
-                                const category = CATEGORIES.find(c => c.id === tx.categoryId);
+                                const category = categories.find(c => c.id === tx.categoryId);
                                 return (
                                     <tr key={tx.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap text-slate-500 dark:text-slate-400">
@@ -244,13 +257,41 @@ export default function TransactionsPage() {
                                     <label className="text-sm font-medium text-slate-500">Category</label>
                                     <select
                                         value={categoryId}
-                                        onChange={(e) => setCategoryId(e.target.value)}
+                                        onChange={(e) => {
+                                            const newCategoryId = e.target.value;
+                                            setCategoryId(newCategoryId);
+                                            const category = categories.find(c => c.id === newCategoryId);
+                                            if (category) {
+                                                setType(category.type);
+                                            }
+                                        }}
                                         className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
                                     >
                                         <option value="" disabled>Select Category</option>
-                                        {filteredCategories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                        ))}
+
+                                        {incomeCategories.length > 0 && (
+                                            <optgroup label="Income">
+                                                {incomeCategories.map(cat => (
+                                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                ))}
+                                            </optgroup>
+                                        )}
+
+                                        {fixedCategories.length > 0 && (
+                                            <optgroup label="Fixed Expenses">
+                                                {fixedCategories.map(cat => (
+                                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                ))}
+                                            </optgroup>
+                                        )}
+
+                                        {variableCategories.length > 0 && (
+                                            <optgroup label="Variable Expenses">
+                                                {variableCategories.map(cat => (
+                                                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                ))}
+                                            </optgroup>
+                                        )}
                                     </select>
                                 </div>
 
@@ -285,7 +326,7 @@ export default function TransactionsPage() {
                                 <div className="flex gap-3 rounded-lg border border-brand-warning/20 bg-brand-warning/5 p-4 text-sm text-brand-warning">
                                     <AlertCircle className="h-5 w-5 shrink-0" />
                                     <p>
-                                        This will affect your monthly variable limit of <strong>{formatCurrency(VARIABLE_BUDGET_LIMIT)}</strong>.
+                                        This will affect your monthly variable limit of <strong>{formatCurrency(variableBudgetLimit)}</strong>.
                                     </p>
                                 </div>
                             )}

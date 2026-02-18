@@ -1,17 +1,67 @@
 
 import { useNavigate } from '@tanstack/react-router';
-import { useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { calculateDashboardStats, CATEGORIES } from '../../services/mockData';
+import { useDashboardStats } from '../../hooks/useDashboardStats';
+import { useCategories } from '../../hooks/useCategories';
+import { QueryErrorFallback } from '../../components/ui/QueryErrorFallback';
+import { DashboardSkeleton } from '../../components/ui/DashboardSkeleton';
 import { formatCurrency, cn } from '../../lib/utils';
 import { Wallet, CreditCard, ShoppingCart, DollarSign } from 'lucide-react';
 import { useDate } from '../../context/DateContext';
+import { useState } from 'react'; // Add useState import
+import { useUpdateBudget } from '../../hooks/useBudgets'; // Add hook import
+import { Pencil, Check, X } from 'lucide-react'; // Add icons
 
 export default function DashboardPage() {
     const navigate = useNavigate();
     const { currentDate, monthName, year } = useDate();
-    const stats = useMemo(() => calculateDashboardStats(currentDate), [currentDate]);
+
+    const { data: stats, isLoading, error, refetch } = useDashboardStats(currentDate);
+    const { data: categories = [] } = useCategories();
+
+    // Budget Mutation
+    const updateBudgetMutation = useUpdateBudget();
+    const [isEditingBudget, setIsEditingBudget] = useState(false);
+    const [budgetInput, setBudgetInput] = useState('');
+
+    const handleStartEdit = () => {
+        if (stats) {
+            setBudgetInput(stats.variableBudgetLimit.toString());
+            setIsEditingBudget(true);
+        }
+    };
+
+    const handleSaveBudget = () => {
+        const amount = parseFloat(budgetInput);
+        if (isNaN(amount) || amount < 0) return;
+
+        updateBudgetMutation.mutate({
+            date: currentDate,
+            amount: amount
+        }, {
+            onSuccess: () => {
+                setIsEditingBudget(false);
+            }
+        });
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditingBudget(false);
+        setBudgetInput('');
+    };
+
+    if (isLoading) {
+        return <DashboardSkeleton />;
+    }
+
+    if (error) {
+        return <QueryErrorFallback error={error} resetErrorBoundary={refetch} />;
+    }
+
+    if (!stats) {
+        return null;
+    }
 
     // Calculate color based on percentage
     const gaugeColor = stats.variablePercentage > 100
@@ -107,7 +157,14 @@ export default function DashboardPage() {
                 {/* Global Variable Goal - Main Feature */}
                 <Card className="col-span-4 lg:col-span-4 border-brand-primary/20 bg-gradient-to-br from-white to-slate-50 dark:from-brand-surface dark:to-slate-900">
                     <CardHeader>
-                        <CardTitle>Global Variable Goal</CardTitle>
+                        <div className="flex items-center justify-between">
+                            <CardTitle>Global Variable Goal</CardTitle>
+                            {!isEditingBudget && (
+                                <Button variant="ghost" size="sm" onClick={handleStartEdit} className="h-8 w-8 p-0">
+                                    <Pencil className="h-4 w-4 text-slate-500" />
+                                </Button>
+                            )}
+                        </div>
                         <CardDescription>
                             Your spending limit for all extra expenses this month.
                         </CardDescription>
@@ -152,12 +209,33 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Details */}
-                        <div className="space-y-4 text-center md:text-left">
+                        <div className="space-y-4 text-center md:text-left min-w-[200px]">
                             <div>
                                 <div className="text-sm text-slate-500 mb-1">Total Budget Goal</div>
-                                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                                    {formatCurrency(stats.variableBudgetLimit)}
-                                </div>
+                                {isEditingBudget ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="relative w-32">
+                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                                            <input
+                                                type="number"
+                                                value={budgetInput}
+                                                onChange={(e) => setBudgetInput(e.target.value)}
+                                                className="w-full rounded-md border border-slate-300 bg-white px-2 py-1 pl-5 text-lg font-bold outline-none focus:border-brand-primary dark:border-slate-700 dark:bg-slate-900"
+                                                autoFocus
+                                            />
+                                        </div>
+                                        <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-brand-success hover:text-brand-success hover:bg-brand-success/10" onClick={handleSaveBudget}>
+                                            <Check className="h-4 w-4" />
+                                        </Button>
+                                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-slate-500" onClick={handleCancelEdit}>
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                                        {formatCurrency(stats.variableBudgetLimit)}
+                                    </div>
+                                )}
                             </div>
                             <div>
                                 <div className="text-sm text-slate-500 mb-1">Remaining</div>
@@ -181,7 +259,7 @@ export default function DashboardPage() {
                     <CardContent>
                         <div className="space-y-6">
                             {stats.variableTransactions.map((tx) => {
-                                const category = CATEGORIES.find(c => c.id === tx.categoryId);
+                                const category = categories.find(c => c.id === tx.categoryId);
                                 const percentOfTotal = (tx.amount / stats.variableBudgetLimit) * 100;
 
                                 return (

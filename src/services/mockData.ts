@@ -1,3 +1,12 @@
+/**
+ * @deprecated This file contains static mock data for development.
+ * For production, use src/services/supabaseData.ts instead.
+ * 
+ * NOTE: This file is kept for:
+ * 1. Unit tests that don't need real database
+ * 2. Storybook component demos
+ * 3. Offline development mode
+ */
 
 import type { Transaction, Category } from '../types';
 

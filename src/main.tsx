@@ -7,7 +7,16 @@ import './index.css'
 // Import the generated route tree
 import { routeTree } from './routeTree.gen.ts'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 30 * 1000, // 30 seconds default
+      gcTime: 5 * 60 * 1000, // 5 minutes (formerly cacheTime)
+    },
+  },
+})
 
 const router = createRouter({ routeTree })
 

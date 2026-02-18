@@ -14,6 +14,9 @@ export interface Category {
     type: TransactionType;
     icon?: string;       // Lucide icon name
     color?: string;      // Tailwind color class or Hex
+    userId?: string;     // Supabase user_id
+    createdAt?: string;  // Supabase timestamp
+    updatedAt?: string;  // Supabase timestamp
 }
 
 export interface Transaction {
@@ -24,6 +27,9 @@ export interface Transaction {
     categoryId: string;  // Reference to Category.id
     type: TransactionType;
     isPaid: boolean;     // Crucial for the 'Fixed Expenses' checklist
+    userId?: string;     // Supabase user_id
+    createdAt?: string;  // Supabase timestamp
+    updatedAt?: string;  // Supabase timestamp
 }
 
 /**
@@ -31,8 +37,13 @@ export interface Transaction {
  * Used primarily for Variable Expenses.
  */
 export interface BudgetGoal {
+    id?: string;         // Supabase UUID
     categoryId: string;
-    monthlyLimit: number; // The "Meta" amount
+    amount: number;      // limit_amount
+    month: string;       // month_year (YYYY-MM-DD or YYYY-MM)
+    userId?: string;     // Supabase user_id
+    createdAt?: string;  // Supabase timestamp
+    updatedAt?: string;  // Supabase timestamp
 }
 
 /**

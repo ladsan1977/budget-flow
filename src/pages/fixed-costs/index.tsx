@@ -2,14 +2,25 @@
 import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { INITIAL_TRANSACTIONS, CATEGORIES } from '../../services/mockData';
+import { useTransactionsByMonth } from '../../hooks/useTransactions';
+import { useCategories } from '../../hooks/useCategories';
+import { QueryErrorFallback } from '../../components/ui/QueryErrorFallback';
 import { formatCurrency, cn } from '../../lib/utils';
-import { Copy, X, Calendar, ArrowRight, Plus } from 'lucide-react';
+import { Copy, X, Calendar, Plus } from 'lucide-react';
 import type { Transaction } from '../../types';
 import { useDate } from '../../context/DateContext';
+import { useCreateTransaction, useDeleteTransaction, useUpdateTransaction } from '../../hooks/useTransactionMutations';
 
 export default function FixedExpensesPage() {
     const { currentDate, monthName, year } = useDate();
+
+    const { data: transactions = [], error } = useTransactionsByMonth('fixed');
+    const { data: categories = [] } = useCategories();
+
+    if (error) {
+        return <QueryErrorFallback error={error} title="Failed to load fixed expenses" />;
+    }
+
     // Helper formatted string YYYY-MM
     const currentMonthStr = useMemo(() => {
         const y = currentDate.getFullYear();
@@ -17,16 +28,25 @@ export default function FixedExpensesPage() {
         return `${y}-${m}`;
     }, [currentDate]);
 
-    const [transactions, setTransactions] = useState<Transaction[]>(INITIAL_TRANSACTIONS);
+    // Mutations
+    const createMutation = useCreateTransaction();
+    const deleteMutation = useDeleteTransaction();
+    const updateMutation = useUpdateTransaction();
+
+    // Transactions are now just the server transactions, filtering is handled by the hook but we need to filter for fixed type specifically if the hook returns all
+    // Actually useTransactionsByMonth(currentDate, 'fixed') already filters by type 'fixed'
+    // So transactions = serverTransactions
+
+    // const transactions = serverTransactions; // Removed incorrect redeclaration
+
     const [isReplicateModalOpen, setIsReplicateModalOpen] = useState(false);
     const [draftTransactions, setDraftTransactions] = useState<Transaction[]>([]);
 
-    // Filter transactions for the current viewing month and type 'fixed'
+    // Filter transactions for the current viewing month (API already does this but good to double check or align with previous logic)
     const currentMonthFixedExpenses = useMemo(() => {
-        return transactions.filter(tx =>
-            tx.type === 'fixed' && tx.date.startsWith(currentMonthStr)
-        );
-    }, [transactions, currentMonthStr]);
+        // The hook already filters by month and type, so we can just use the data
+        return transactions;
+    }, [transactions]);
 
     const totalFixedAmount = useMemo(() => {
         return currentMonthFixedExpenses.reduce((sum, tx) => sum + tx.amount, 0);
@@ -70,7 +90,7 @@ export default function FixedExpensesPage() {
             const day = tx.date.split('-')[2];
             return {
                 ...tx,
-                id: `replicated_${Date.now()}_${tx.id}`,
+                id: `replicated_${Date.now()}_${tx.id}`, // Assign a temporary unique ID for draft
                 // Use currentMonthStr directly
                 date: `${currentMonthStr}-${day}`,
                 isPaid: false, // Reset status
@@ -82,15 +102,26 @@ export default function FixedExpensesPage() {
     };
 
     const handleConfirmReplication = () => {
-        setTransactions(prev => [...prev, ...draftTransactions]);
+        draftTransactions.forEach(tx => {
+            createMutation.mutate({
+                description: tx.description,
+                amount: tx.amount,
+                date: tx.date, // Already formatted for current month in openReplicateModal
+                categoryId: tx.categoryId,
+                type: 'fixed',
+                isPaid: false,
+            });
+        });
+
         setIsReplicateModalOpen(false);
         setDraftTransactions([]);
     };
 
-    const togglePaidStatus = (id: string) => {
-        setTransactions(prev => prev.map(tx =>
-            tx.id === id ? { ...tx, isPaid: !tx.isPaid } : tx
-        ));
+    const togglePaidStatus = (id: string, currentStatus: boolean) => {
+        updateMutation.mutate({
+            id,
+            updates: { isPaid: !currentStatus }
+        });
     };
 
     const handleDraftChange = (id: string, field: keyof Transaction, value: any) => {
@@ -199,7 +230,7 @@ export default function FixedExpensesPage() {
                                 </tr>
                             ) : (
                                 currentMonthFixedExpenses.map((tx) => {
-                                    const category = CATEGORIES.find(c => c.id === tx.categoryId);
+                                    const category = categories.find(c => c.id === tx.categoryId);
                                     return (
                                         <tr key={tx.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                                             <td className="px-6 py-4">
@@ -222,7 +253,7 @@ export default function FixedExpensesPage() {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <button
-                                                    onClick={() => togglePaidStatus(tx.id)}
+                                                    onClick={() => togglePaidStatus(tx.id, tx.isPaid)}
                                                     className={cn(
                                                         "inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold transition-all min-w-[70px]",
                                                         tx.isPaid
@@ -234,8 +265,13 @@ export default function FixedExpensesPage() {
                                                 </button>
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-400 hover:text-brand-primary">
-                                                    <ArrowRight className="h-4 w-4" />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-slate-400 hover:text-red-500"
+                                                    onClick={() => deleteMutation.mutate(tx.id)}
+                                                >
+                                                    <X className="h-4 w-4" />
                                                 </Button>
                                             </td>
                                         </tr>
@@ -247,7 +283,7 @@ export default function FixedExpensesPage() {
                 </div>
             </Card>
 
-            {/* Replication Modal (Same as before) */}
+            {/* Replication Modal */}
             {isReplicateModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
                     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={() => setIsReplicateModalOpen(false)} />
