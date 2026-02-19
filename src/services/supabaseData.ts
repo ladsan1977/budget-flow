@@ -159,61 +159,39 @@ export const fetchBudgets = async (date?: Date): Promise<BudgetGoal[]> => {
 
 /**
  * Set the monthly variable budget (Managed via 'Groceries' category)
- * Performs a manual upsert to avoid duplicates since there is no unique constraint
+ * Uses native .upsert() targeting the unique constraint (user_id, category_id, month_year)
+ * for a clean single-request operation.
  */
 export const setMonthlyVariableBudget = async (date: Date, amount: number): Promise<BudgetGoal> => {
     const userId = getDevUserId();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     const dateStr = `${year}-${String(month).padStart(2, '0')}-01`;
-    const GROCERIES_CATEGORY_ID = 'cat_groceries';
 
-    // 1. Check if a budget already exists for this month/category
-    const { data: existingData, error: fetchError } = await (supabase
+    type BudgetInsert = Database['public']['Tables']['budgets']['Insert'];
+
+    const payload: BudgetInsert = {
+        user_id: userId,
+        category_id: 'cat_groceries',
+        month_year: dateStr,
+        limit_amount: amount,
+    };
+
+    // The Supabase client cannot resolve the row type for `.upsert()` without
+    // a fully-wired generic client, so we cast the payload to `any` here —
+    // the same pattern used for `.insert()` / `.update()` elsewhere in this file.
+    // The `payload` constant is still strongly-typed, so column names are enforced.
+    const { data, error } = await (supabase
         .from('budgets') as any)
-        .select('*')
-        .eq('user_id', userId)
-        .eq('category_id', GROCERIES_CATEGORY_ID)
-        .eq('month_year', dateStr)
-        .maybeSingle();
+        .upsert(payload as any, { onConflict: 'user_id,category_id,month_year' })
+        .select()
+        .single();
 
-    if (fetchError) {
-        throw new Error(`Failed to check existing budget: ${fetchError.message}`);
+    if (error) {
+        throw new Error(`Failed to save budget: ${error.message}`);
     }
 
-    const existing = existingData as BudgetRow | null;
-
-    let result: BudgetRow;
-
-    if (existing) {
-        // 2a. Update existing
-        const { data, error } = await (supabase
-            .from('budgets') as any)
-            .update({ limit_amount: amount })
-            .eq('id', existing.id)
-            .select()
-            .single();
-
-        if (error) throw new Error(`Failed to update budget: ${error.message}`);
-        result = data;
-    } else {
-        // 2b. Insert new
-        const { data, error } = await (supabase
-            .from('budgets') as any)
-            .insert({
-                user_id: userId,
-                category_id: GROCERIES_CATEGORY_ID,
-                month_year: dateStr,
-                limit_amount: amount
-            })
-            .select()
-            .single();
-
-        if (error) throw new Error(`Failed to create budget: ${error.message}`);
-        result = data;
-    }
-
-    return mapBudget(result);
+    return mapBudget(data as BudgetRow);
 };
 
 /**

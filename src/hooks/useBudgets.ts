@@ -39,18 +39,13 @@ export function useUpdateBudget() {
     return useMutation({
         mutationFn: ({ date, amount }: { date: Date; amount: number }) =>
             setMonthlyVariableBudget(date, amount),
-        onSuccess: (_, variables) => {
-            const { date } = variables;
-
-            // Invalidate budgets query
+        onSuccess: () => {
+            // Invalidate ALL budget queries (any month/filter variant)
             queryClient.invalidateQueries({ queryKey: ['budgets'] });
 
-            // Invalidate dashboard stats for this month
-            // Note: dashboard-stats key in hook is ['dashboard-stats', year, month]
-            // month in hook is 1-indexed
-            queryClient.invalidateQueries({
-                queryKey: ['dashboard-stats', date.getFullYear(), date.getMonth() + 1]
-            });
+            // Invalidate ALL dashboard-stats queries to ensure the UI
+            // reflects the updated variable budget limit immediately.
+            queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
 
             toast.success('Budget updated successfully');
         },
