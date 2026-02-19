@@ -19,7 +19,7 @@ export default function TransactionsPage() {
 
     // Server state is now sufficient since we invalidate queries on success
     const { data: transactions = [], error, refetch } = useTransactionsByMonth();
-    const { data: categories = [] } = useCategories();
+    const { data: categories = [], isLoading: categoriesLoading } = useCategories();
     const { data: variableBudgetLimit = 0 } = useVariableBudgetLimit(currentDate);
 
     const createMutation = useCreateTransaction();
@@ -257,6 +257,7 @@ export default function TransactionsPage() {
                                     <label className="text-sm font-medium text-slate-500">Category</label>
                                     <select
                                         value={categoryId}
+                                        disabled={categoriesLoading}
                                         onChange={(e) => {
                                             const newCategoryId = e.target.value;
                                             setCategoryId(newCategoryId);
@@ -265,9 +266,16 @@ export default function TransactionsPage() {
                                                 setType(category.type);
                                             }
                                         }}
-                                        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
+                                        className={cn(
+                                            "h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100",
+                                            categoriesLoading && "opacity-60 cursor-not-allowed"
+                                        )}
                                     >
-                                        <option value="" disabled>Select Category</option>
+                                        {categoriesLoading ? (
+                                            <option>Loading categories…</option>
+                                        ) : (
+                                            <option value="" disabled>Select Category</option>
+                                        )}
 
                                         {incomeCategories.length > 0 && (
                                             <optgroup label="Income">
