@@ -3,10 +3,13 @@ import type { Category, Transaction, BudgetGoal } from '../types';
 import type { Database } from '../types/database.types';
 import { VARIABLE_CATEGORY_ID } from '../lib/constants';
 
-// Type helpers to convert database rows to app types
+// ─── Database row / payload type aliases ─────────────────────────────────────
 type CategoryRow = Database['public']['Tables']['categories']['Row'];
 type TransactionRow = Database['public']['Tables']['transactions']['Row'];
+type TransactionInsert = Database['public']['Tables']['transactions']['Insert'];
+type TransactionUpdate = Database['public']['Tables']['transactions']['Update'];
 type BudgetRow = Database['public']['Tables']['budgets']['Row'];
+type BudgetInsert = Database['public']['Tables']['budgets']['Insert'];
 
 /**
  * Convert database category to app Category type
@@ -169,8 +172,6 @@ export const setMonthlyVariableBudget = async (date: Date, amount: number): Prom
     const year = date.getFullYear();
     const dateStr = `${year}-${String(month).padStart(2, '0')}-01`;
 
-    type BudgetInsert = Database['public']['Tables']['budgets']['Insert'];
-
     const payload: BudgetInsert = {
         user_id: userId,
         category_id: VARIABLE_CATEGORY_ID,
@@ -178,13 +179,9 @@ export const setMonthlyVariableBudget = async (date: Date, amount: number): Prom
         limit_amount: amount,
     };
 
-    // The Supabase client cannot resolve the row type for `.upsert()` without
-    // a fully-wired generic client, so we cast the payload to `any` here —
-    // the same pattern used for `.insert()` / `.update()` elsewhere in this file.
-    // The `payload` constant is still strongly-typed, so column names are enforced.
-    const { data, error } = await (supabase
-        .from('budgets') as any)
-        .upsert(payload as any, { onConflict: 'user_id,category_id,month_year' })
+    const { data, error } = await supabase
+        .from('budgets')
+        .upsert(payload, { onConflict: 'user_id,category_id,month_year' })
         .select()
         .single();
 
@@ -192,7 +189,7 @@ export const setMonthlyVariableBudget = async (date: Date, amount: number): Prom
         throw new Error(`Failed to save budget: ${error.message}`);
     }
 
-    return mapBudget(data as BudgetRow);
+    return mapBudget(data);
 };
 
 
@@ -205,17 +202,19 @@ export const createTransaction = async (
 ): Promise<Transaction> => {
     const userId = getDevUserId();
 
-    const { data, error } = await (supabase
-        .from('transactions') as any)
-        .insert({
-            user_id: userId,
-            amount: transaction.amount,
-            date: transaction.date,
-            description: transaction.description,
-            category_id: transaction.categoryId,
-            type: transaction.type,
-            is_paid: transaction.isPaid,
-        })
+    const payload: TransactionInsert = {
+        user_id: userId,
+        amount: transaction.amount,
+        date: transaction.date,
+        description: transaction.description,
+        category_id: transaction.categoryId,
+        type: transaction.type,
+        is_paid: transaction.isPaid,
+    };
+
+    const { data, error } = await supabase
+        .from('transactions')
+        .insert(payload)
         .select()
         .single();
 
@@ -223,7 +222,7 @@ export const createTransaction = async (
         throw new Error(`Failed to create transaction: ${error.message}`);
     }
 
-    return mapTransaction(data as TransactionRow);
+    return mapTransaction(data);
 };
 
 /**
@@ -235,9 +234,8 @@ export const updateTransaction = async (
 ): Promise<Transaction> => {
     const userId = getDevUserId();
 
-    type TransactionUpdate = Database['public']['Tables']['transactions']['Update'];
+    // Build a partial update containing only the fields that actually changed.
     const updateData: TransactionUpdate = {};
-
     if (updates.amount !== undefined) updateData.amount = updates.amount;
     if (updates.date !== undefined) updateData.date = updates.date;
     if (updates.description !== undefined) updateData.description = updates.description;
@@ -245,11 +243,11 @@ export const updateTransaction = async (
     if (updates.type !== undefined) updateData.type = updates.type;
     if (updates.isPaid !== undefined) updateData.is_paid = updates.isPaid;
 
-    const { data, error } = await (supabase
-        .from('transactions') as any)
+    const { data, error } = await supabase
+        .from('transactions')
         .update(updateData)
         .eq('id', id)
-        .eq('user_id', userId) // RLS check
+        .eq('user_id', userId)   // RLS ownership check
         .select()
         .single();
 
@@ -257,7 +255,7 @@ export const updateTransaction = async (
         throw new Error(`Failed to update transaction: ${error.message}`);
     }
 
-    return mapTransaction(data as TransactionRow);
+    return mapTransaction(data);
 };
 
 /**
