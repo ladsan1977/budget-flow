@@ -47,13 +47,14 @@ export interface BudgetGoal {
 }
 
 /**
- * Dashboard Summary logic
+ * Aggregated stats for the Dashboard, computed client-side from cached data.
+ * Calculated by the useDashboardStats hook via TanStack Query select transforms.
  */
-export interface MonthlySummary {
-    month: string;
+export interface DashboardStats {
     totalIncome: number;
-    totalFixed: number;
-    totalVariable: number;
-    variableBudgetLimit: number; // Sum of all Variable BudgetGoals
-    netCashFlow: number;         // Income - (Fixed + Variable)
+    totalFixedExpenses: number;
+    totalVariableExpenses: number;
+    netFlow: number;
+    variableBudgetLimit: number;
+    variableBudgetPercent: number;
 }

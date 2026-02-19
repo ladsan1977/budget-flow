@@ -2,33 +2,43 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { INITIAL_TRANSACTIONS, CATEGORIES, VARIABLE_BUDGET_LIMIT } from '../../services/mockData'; // Assuming we re-use these for now
+import { CurrencyInput } from '../../components/ui/CurrencyInput';
+import { useTransactionsByMonth } from '../../hooks/useTransactions';
+import { useVariableBudgetLimit, useUpdateBudget } from '../../hooks/useBudgets';
+import { useCategories } from '../../hooks/useCategories';
+import { useDate } from '../../context/DateContext';
+import { VARIABLE_CATEGORY_ID } from '../../lib/constants';
 import { formatCurrency, cn } from '../../lib/utils';
 import { Edit2, AlertCircle } from 'lucide-react';
 
 export default function VariableCostsPage() {
-    // 1. Logic & State: Create a state variable for globalVariableLimit (default: $1,900,000).
-    const [globalLimit, setGlobalLimit] = useState(VARIABLE_BUDGET_LIMIT);
+    const { currentDate } = useDate();
+
+    // Live data from Supabase (via TanStack Query cache)
+    const { data: variableTransactions = [] } = useTransactionsByMonth('variable');
+    const { data: globalLimit = 0, isLoading: limitLoading } = useVariableBudgetLimit(currentDate);
+    const { data: categories = [] } = useCategories();
+    const updateBudgetMutation = useUpdateBudget();
+
+    // Inline budget-edit state
     const [isEditingLimit, setIsEditingLimit] = useState(false);
-    const [tempLimit, setTempLimit] = useState(globalLimit.toString());
+    const [tempLimit, setTempLimit] = useState<number>(0);
 
-    // 2. Automatic Calculation: The 'Total Spent' must be the dynamic sum of all transactions in mockData where type === 'variable'.
-    const variableTransactions = useMemo(() => {
-        return INITIAL_TRANSACTIONS.filter(t => t.type === 'variable');
-    }, []);
 
-    const totalSpent = useMemo(() => {
-        return variableTransactions.reduce((acc, t) => acc + t.amount, 0);
-    }, [variableTransactions]);
+    const totalSpent = useMemo(
+        () => variableTransactions.reduce((acc, t) => acc + t.amount, 0),
+        [variableTransactions]
+    );
 
     const percentage = globalLimit > 0 ? (totalSpent / globalLimit) * 100 : 0;
     const remainingBalance = globalLimit - totalSpent;
 
+
     // Determine color based on percentage
     const getStatusColor = (percent: number) => {
-        if (percent < 70) return 'bg-brand-success'; // Mint
-        if (percent < 90) return 'bg-brand-warning'; // Amber
-        return 'bg-brand-danger'; // Rose
+        if (percent < 70) return 'bg-brand-success';
+        if (percent < 90) return 'bg-brand-warning';
+        return 'bg-brand-danger';
     };
 
     const getStatusTextColor = (percent: number) => {
@@ -37,36 +47,37 @@ export default function VariableCostsPage() {
         return 'text-brand-danger';
     };
 
-    // 3. Expense Breakdown List:
+    // Spending breakdown aggregated by category
     const breakdown = useMemo(() => {
         const categoryMap = new Map<string, number>();
-
         variableTransactions.forEach(t => {
-            const current = categoryMap.get(t.categoryId) || 0;
-            categoryMap.set(t.categoryId, current + t.amount);
+            categoryMap.set(t.categoryId, (categoryMap.get(t.categoryId) || 0) + t.amount);
         });
-
-        const result = Array.from(categoryMap.entries()).map(([catId, amount]) => {
-            const category = CATEGORIES.find(c => c.id === catId);
+        return Array.from(categoryMap.entries()).map(([catId, amount]) => {
+            const category = categories.find(c => c.id === catId);
             return {
                 id: catId,
+                isPrimary: catId === VARIABLE_CATEGORY_ID,
                 name: category?.name || 'Uncategorized',
                 amount,
                 percentOfLimit: globalLimit > 0 ? (amount / globalLimit) * 100 : 0,
                 percentOfSpent: totalSpent > 0 ? (amount / totalSpent) * 100 : 0,
             };
         }).sort((a, b) => b.amount - a.amount);
-
-        return result;
-    }, [variableTransactions, totalSpent, globalLimit]);
+    }, [variableTransactions, totalSpent, globalLimit, categories]);
 
     const handleSaveLimit = () => {
-        const newLimit = parseFloat(tempLimit);
-        if (!isNaN(newLimit) && newLimit > 0) {
-            setGlobalLimit(newLimit);
-            setIsEditingLimit(false);
+        if (!isNaN(tempLimit) && tempLimit > 0) {
+            updateBudgetMutation.mutate(
+                { date: currentDate, amount: tempLimit },
+                { onSuccess: () => setIsEditingLimit(false) }
+            );
         }
     };
+
+    if (limitLoading) {
+        return null; // DashboardSkeleton or spinner could go here
+    }
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 max-w-5xl mx-auto">
@@ -98,7 +109,7 @@ export default function VariableCostsPage() {
                                 </div>
                             ) : (
                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => {
-                                    setTempLimit(globalLimit.toString());
+                                    setTempLimit(globalLimit);
                                     setIsEditingLimit(true);
                                 }}>
                                     <Edit2 className="h-4 w-4" />
@@ -108,16 +119,12 @@ export default function VariableCostsPage() {
                         </CardHeader>
                         <CardContent>
                             {isEditingLimit ? (
-                                <div className="flex items-center gap-2">
-                                    <span className="text-2xl font-bold text-slate-400">$</span>
-                                    <input
-                                        type="number"
-                                        value={tempLimit}
-                                        onChange={(e) => setTempLimit(e.target.value)}
-                                        className="text-4xl font-bold bg-transparent border-b border-slate-300 focus:border-brand-primary outline-none w-full tabular-nums text-slate-900 dark:text-white"
-                                        autoFocus
-                                    />
-                                </div>
+                                <CurrencyInput
+                                    value={tempLimit}
+                                    onChange={setTempLimit}
+                                    autoFocus
+                                    className="text-4xl font-bold py-1 border-0 border-b border-slate-300 rounded-none focus-visible:ring-0 focus-visible:border-brand-primary"
+                                />
                             ) : (
                                 <div className="text-4xl font-bold text-slate-900 dark:text-white tabular-nums">
                                     {formatCurrency(globalLimit)}

@@ -7,6 +7,7 @@ import { useCategories } from '../../hooks/useCategories';
 import { QueryErrorFallback } from '../../components/ui/QueryErrorFallback';
 import { formatCurrency, cn } from '../../lib/utils';
 import { Copy, X, Calendar, Plus } from 'lucide-react';
+import { CurrencyInput } from '../../components/ui/CurrencyInput';
 import type { Transaction } from '../../types';
 import { useDate } from '../../context/DateContext';
 import { useCreateTransaction, useDeleteTransaction, useUpdateTransaction } from '../../hooks/useTransactionMutations';
@@ -320,15 +321,10 @@ export default function FixedExpensesPage() {
                                                 />
                                             </td>
                                             <td className="px-6 py-3">
-                                                <div className="relative">
-                                                    <span className="absolute left-0 top-1/2 -translate-y-1/2 text-slate-400">$</span>
-                                                    <input
-                                                        type="number"
-                                                        value={tx.amount}
-                                                        onChange={(e) => handleDraftChange(tx.id, 'amount', parseFloat(e.target.value))}
-                                                        className="w-full bg-transparent border-none focus:ring-0 p-0 pl-3 font-bold text-slate-900 dark:text-slate-100 tabular-nums"
-                                                    />
-                                                </div>
+                                                <CurrencyInput
+                                                    value={tx.amount}
+                                                    onChange={(val) => handleDraftChange(tx.id, 'amount', val)}
+                                                />
                                             </td>
                                             <td className="px-6 py-3 text-right">
                                                 <button onClick={() => removeDraft(tx.id)} className="text-slate-400 hover:text-red-500 transition-colors">

@@ -3,21 +3,23 @@ import { useNavigate } from '@tanstack/react-router';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { useDashboardStats } from '../../hooks/useDashboardStats';
+import { useTransactionsByMonth } from '../../hooks/useTransactions';
 import { useCategories } from '../../hooks/useCategories';
 import { QueryErrorFallback } from '../../components/ui/QueryErrorFallback';
 import { DashboardSkeleton } from '../../components/ui/DashboardSkeleton';
 import { formatCurrency, cn } from '../../lib/utils';
 import { Wallet, CreditCard, ShoppingCart, DollarSign } from 'lucide-react';
 import { useDate } from '../../context/DateContext';
-import { useState } from 'react'; // Add useState import
-import { useUpdateBudget } from '../../hooks/useBudgets'; // Add hook import
-import { Pencil, Check, X } from 'lucide-react'; // Add icons
+import { useState } from 'react';
+import { useUpdateBudget } from '../../hooks/useBudgets';
+import { Pencil, Check, X } from 'lucide-react';
 
 export default function DashboardPage() {
     const navigate = useNavigate();
     const { currentDate, monthName, year } = useDate();
 
     const { data: stats, isLoading, error, refetch } = useDashboardStats(currentDate);
+    const { data: variableTransactions = [] } = useTransactionsByMonth('variable');
     const { data: categories = [] } = useCategories();
 
     // Budget Mutation
@@ -64,15 +66,15 @@ export default function DashboardPage() {
     }
 
     // Calculate color based on percentage
-    const gaugeColor = stats.variablePercentage > 100
+    const gaugeColor = stats.variableBudgetPercent > 100
         ? 'text-brand-danger'
-        : stats.variablePercentage > 80
+        : stats.variableBudgetPercent > 80
             ? 'text-brand-warning'
             : 'text-brand-success';
 
-    const gaugeStroke = stats.variablePercentage > 100
+    const gaugeStroke = stats.variableBudgetPercent > 100
         ? '#F43F5E' // brand-danger
-        : stats.variablePercentage > 80
+        : stats.variableBudgetPercent > 80
             ? '#F59E0B' // brand-warning
             : '#10B981'; // brand-success
 
@@ -115,7 +117,7 @@ export default function DashboardPage() {
                         <CreditCard className="h-4 w-4 text-brand-primary" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(stats.totalFixed)}</div>
+                        <div className="text-2xl font-bold">{formatCurrency(stats.totalFixedExpenses)}</div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                             Scheduled & Regular
                         </p>
@@ -128,9 +130,9 @@ export default function DashboardPage() {
                         <ShoppingCart className="h-4 w-4 text-brand-warning" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{formatCurrency(stats.totalVariable)}</div>
+                        <div className="text-2xl font-bold">{formatCurrency(stats.totalVariableExpenses)}</div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                            {(stats.variablePercentage).toFixed(1)}% of budget
+                            {(stats.variableBudgetPercent).toFixed(1)}% of budget
                         </p>
                     </CardContent>
                 </Card>
@@ -141,8 +143,8 @@ export default function DashboardPage() {
                         <DollarSign className="h-4 w-4 text-slate-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className={cn("text-2xl font-bold", stats.netCashFlow >= 0 ? 'text-brand-success' : 'text-brand-danger')}>
-                            {formatCurrency(stats.netCashFlow)}
+                        <div className={cn("text-2xl font-bold", stats.netFlow >= 0 ? 'text-brand-success' : 'text-brand-danger')}>
+                            {formatCurrency(stats.netFlow)}
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                             Income - (Fixed + Variable)
@@ -196,13 +198,13 @@ export default function DashboardPage() {
                                     cy="50"
                                     style={{
                                         strokeDasharray: `${2 * Math.PI * 40}`,
-                                        strokeDashoffset: `${2 * Math.PI * 40 * (1 - Math.min(stats.variablePercentage, 100) / 100)}`,
+                                        strokeDashoffset: `${2 * Math.PI * 40 * (1 - Math.min(stats.variableBudgetPercent, 100) / 100)}`,
                                     }}
                                 />
                             </svg>
                             <div className="absolute flex flex-col items-center">
                                 <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                                    {Math.round(stats.variablePercentage)}%
+                                    {Math.round(stats.variableBudgetPercent)}%
                                 </span>
                                 <span className="text-xs text-slate-500 font-medium">CONSUMED</span>
                             </div>
@@ -240,7 +242,7 @@ export default function DashboardPage() {
                             <div>
                                 <div className="text-sm text-slate-500 mb-1">Remaining</div>
                                 <div className="text-xl font-semibold text-brand-success">
-                                    {formatCurrency(stats.variableBudgetLimit - stats.totalVariable)}
+                                    {formatCurrency(stats.variableBudgetLimit - stats.totalVariableExpenses)}
                                 </div>
                             </div>
                         </div>
@@ -258,7 +260,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-6">
-                            {stats.variableTransactions.map((tx) => {
+                            {variableTransactions.map((tx) => {
                                 const category = categories.find(c => c.id === tx.categoryId);
                                 const percentOfTotal = (tx.amount / stats.variableBudgetLimit) * 100;
 
@@ -284,7 +286,7 @@ export default function DashboardPage() {
                                 );
                             })}
 
-                            {stats.variableTransactions.length === 0 && (
+                            {variableTransactions.length === 0 && (
                                 <div className="py-8 text-center text-slate-500">
                                     No variable expenses yet.
                                 </div>

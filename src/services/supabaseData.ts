@@ -1,6 +1,7 @@
 import { supabase, getDevUserId } from '../lib/supabase';
 import type { Category, Transaction, BudgetGoal } from '../types';
 import type { Database } from '../types/database.types';
+import { VARIABLE_CATEGORY_ID } from '../lib/constants';
 
 // Type helpers to convert database rows to app types
 type CategoryRow = Database['public']['Tables']['categories']['Row'];
@@ -172,7 +173,7 @@ export const setMonthlyVariableBudget = async (date: Date, amount: number): Prom
 
     const payload: BudgetInsert = {
         user_id: userId,
-        category_id: 'cat_groceries',
+        category_id: VARIABLE_CATEGORY_ID,
         month_year: dateStr,
         limit_amount: amount,
     };
@@ -194,45 +195,7 @@ export const setMonthlyVariableBudget = async (date: Date, amount: number): Prom
     return mapBudget(data as BudgetRow);
 };
 
-/**
- * Calculate dashboard stats from Supabase data
- * Maintains same signature as mock version
- */
-export const calculateDashboardStats = async (currentDate: Date) => {
-    const transactions = await fetchTransactionsByMonth(currentDate);
 
-    // Fetch budget for the specific month to get the variable limit (Groceries proxy)
-    const budgets = await fetchBudgets(currentDate);
-
-    const fixedTransactions = transactions.filter(tx => tx.type === 'fixed');
-    const variableTransactions = transactions.filter(tx => tx.type === 'variable');
-    const incomeTransactions = transactions.filter(tx => tx.type === 'income');
-
-    const totalFixed = fixedTransactions.reduce((sum, tx) => sum + tx.amount, 0);
-    const totalVariable = variableTransactions.reduce((sum, tx) => sum + tx.amount, 0);
-    const totalIncome = incomeTransactions.reduce((sum, tx) => sum + tx.amount, 0);
-
-    // Get the variable budget limit from the 'Groceries' category budget for this month
-    // If not found, default to 0
-    const variableBudgetLimit = budgets
-        .find(b => b.categoryId === 'cat_groceries')?.amount || 0;
-
-    const netCashFlow = totalIncome - (totalFixed + totalVariable);
-    const variablePercentage = variableBudgetLimit > 0
-        ? (totalVariable / variableBudgetLimit) * 100
-        : 0;
-
-    return {
-        totalIncome,
-        totalFixed,
-        totalVariable,
-        variableBudgetLimit,
-        netCashFlow,
-        variablePercentage,
-        fixedTransactions,
-        variableTransactions,
-    };
-};
 
 /**
  * Create a new transaction

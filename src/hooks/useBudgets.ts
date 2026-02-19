@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchBudgets } from '../services/supabaseData';
 import type { BudgetGoal } from '../types';
+import { VARIABLE_CATEGORY_ID } from '../lib/constants';
 
 export function useBudgets(date?: Date) {
     // If date is provided, create a cache key that includes the month/year
@@ -21,7 +22,7 @@ export function useVariableBudgetLimit(date: Date) {
 
     // Logic updated to find the specific 'Groceries' budget which acts as the global variable limit
     const variableLimit = budgets
-        .find(b => b.categoryId === 'cat_groceries')?.amount || 0;
+        .find(b => b.categoryId === VARIABLE_CATEGORY_ID)?.amount || 0;
 
     return {
         ...rest,
