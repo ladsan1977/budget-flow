@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useCategories } from '../../hooks/useCategories';
-import { useCreateTransaction } from '../../hooks/useTransactionMutations';
+import { useCreateTransaction, useUpdateTransaction } from '../../hooks/useTransactionMutations';
 import { formatCurrency, cn } from '../../lib/utils';
 import { X, AlertCircle } from 'lucide-react';
-import type { TransactionType } from '../../types';
+import type { Transaction, TransactionType } from '../../types';
 import { useDate } from '../../context/DateContext';
 import { useVariableBudgetLimit } from '../../hooks/useBudgets';
 
@@ -14,14 +14,16 @@ export interface TransactionModalProps {
     onClose: () => void;
     initialType?: TransactionType;
     lockType?: boolean;
+    initialData?: Transaction | null;
 }
 
-export function TransactionModal({ isOpen, onClose, initialType = 'variable', lockType = false }: TransactionModalProps) {
+export function TransactionModal({ isOpen, onClose, initialType = 'variable', lockType = false, initialData = null }: TransactionModalProps) {
     const { currentDate } = useDate();
     const { data: categories = [], isLoading: categoriesLoading } = useCategories();
     // Default the date to the current viewed month, but if viewing current month try to use today
     const { data: variableBudgetLimit = 0 } = useVariableBudgetLimit(currentDate);
     const createMutation = useCreateTransaction();
+    const updateMutation = useUpdateTransaction();
 
     // Form State
     const [description, setDescription] = useState('');
@@ -34,40 +36,67 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
     // Initial Date Logic
     useEffect(() => {
         if (isOpen) {
-            const today = new Date();
-            const isCurrentMonth = today.getMonth() === currentDate.getMonth() && today.getFullYear() === currentDate.getFullYear();
-            const initDate = isCurrentMonth ? today : new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            if (initialData) {
+                setDescription(initialData.description);
+                setAmount(initialData.amount.toString());
+                setDate(initialData.date);
+                setType(initialData.type);
+                setCategoryId(initialData.categoryId || '');
+                setIsPaid(initialData.isPaid);
+            } else {
+                const today = new Date();
+                const isCurrentMonth = today.getMonth() === currentDate.getMonth() && today.getFullYear() === currentDate.getFullYear();
+                const initDate = isCurrentMonth ? today : new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
 
-            const offset = initDate.getTimezoneOffset();
-            const local = new Date(initDate.getTime() - (offset * 60 * 1000));
-            const dateStr = local.toISOString().split('T')[0];
+                const offset = initDate.getTimezoneOffset();
+                const local = new Date(initDate.getTime() - (offset * 60 * 1000));
+                const dateStr = local.toISOString().split('T')[0];
 
-            setDate(dateStr);
-            setType(initialType);
-            setDescription('');
-            setAmount('');
-            setCategoryId('');
-            setIsPaid(false);
+                setDate(dateStr);
+                setType(initialType);
+                setDescription('');
+                setAmount('');
+                setCategoryId('');
+                setIsPaid(false);
+            }
         }
-    }, [isOpen, currentDate, initialType]);
+    }, [isOpen, currentDate, initialType, initialData]);
 
     if (!isOpen) return null;
 
     const handleSave = () => {
         if (!description || !amount || !categoryId) return;
 
-        createMutation.mutate({
-            description,
-            amount: parseFloat(amount),
-            date,
-            type,
-            categoryId,
-            isPaid,
-        }, {
-            onSuccess: () => {
-                onClose();
-            }
-        });
+        if (initialData) {
+            updateMutation.mutate({
+                id: initialData.id,
+                updates: {
+                    description,
+                    amount: parseFloat(amount),
+                    date,
+                    type,
+                    categoryId,
+                    isPaid,
+                }
+            }, {
+                onSuccess: () => {
+                    onClose();
+                }
+            });
+        } else {
+            createMutation.mutate({
+                description,
+                amount: parseFloat(amount),
+                date,
+                type,
+                categoryId,
+                isPaid,
+            }, {
+                onSuccess: () => {
+                    onClose();
+                }
+            });
+        }
     };
 
     const incomeCategories = categories.filter(c => c.type === 'income');
@@ -80,7 +109,7 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
 
             <Card className="relative w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in fade-in zoom-in-95 duration-200">
                 <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 p-6 dark:border-slate-800">
-                    <CardTitle>Add Transaction</CardTitle>
+                    <CardTitle>{initialData ? 'Edit Transaction' : 'Add Transaction'}</CardTitle>
                     <Button variant="ghost" size="icon" onClick={onClose} className="-mr-2">
                         <X className="h-4 w-4" />
                     </Button>
@@ -239,7 +268,7 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                         Cancel
                     </Button>
                     <Button onClick={handleSave} className="px-8 shadow-lg shadow-brand-primary/20">
-                        Save Transaction
+                        {initialData ? 'Save Changes' : 'Save Transaction'}
                     </Button>
                 </div>
             </Card>

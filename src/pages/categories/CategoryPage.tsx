@@ -7,6 +7,7 @@ import * as LucideIcons from 'lucide-react';
 import { useCategories } from '../../hooks/useCategories';
 import { useCreateCategory, useUpdateCategory, useDeleteCategory } from '../../hooks/useCategoryMutations';
 import { CategoryForm } from '../../components/categories/CategoryForm';
+import { ConfirmModal } from '../../components/common/ConfirmModal';
 import type { Category } from '../../types';
 import { resolveColor } from '../../lib/colors';
 import { Badge } from '../../components/ui/Badge';
@@ -35,6 +36,7 @@ export default function CategoryPage() {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+    const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
     if (error) {
         return <QueryErrorFallback error={error} resetErrorBoundary={refetch} title="Failed to load categories" />;
@@ -51,8 +53,13 @@ export default function CategoryPage() {
     };
 
     const handleDelete = (id: string) => {
-        if (window.confirm('Are you sure you want to delete this category?')) {
-            deleteMutation.mutate(id);
+        setCategoryToDelete(id);
+    };
+
+    const confirmDelete = () => {
+        if (categoryToDelete) {
+            deleteMutation.mutate(categoryToDelete);
+            setCategoryToDelete(null);
         }
     };
 
@@ -62,7 +69,7 @@ export default function CategoryPage() {
                 onSuccess: () => setIsModalOpen(false)
             });
         } else {
-            createMutation.mutate(data as any, {
+            createMutation.mutate(data as unknown as Omit<Category, 'id'>, {
                 onSuccess: () => setIsModalOpen(false)
             });
         }
@@ -72,7 +79,8 @@ export default function CategoryPage() {
         switch (type) {
             case 'income': return 'success';
             case 'variable': return 'warning';
-            default: return 'default';
+            case 'fixed': return 'primary';
+            default: return 'outline';
         }
     };
 
@@ -99,10 +107,10 @@ export default function CategoryPage() {
             {isLoading ? (
                 <div className="text-slate-500">Loading categories...</div>
             ) : (
-                <Card className="overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface">
-                    <div className="overflow-x-auto">
+                <Card className="overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex flex-col max-h-[600px]">
+                    <div className="overflow-y-auto flex-1">
                         <table className="w-full text-sm text-left">
-                            <thead className="bg-white border-b border-slate-100 text-slate-500 dark:bg-brand-surface dark:border-slate-800 dark:text-slate-400">
+                            <thead className="bg-white border-b border-slate-100 text-slate-500 dark:bg-brand-surface dark:border-slate-800 dark:text-slate-400 sticky top-0 z-10">
                                 <tr>
                                     <th className="px-6 py-4 font-medium">Category Name</th>
                                     <th className="px-6 py-4 font-medium">Type</th>
@@ -118,8 +126,8 @@ export default function CategoryPage() {
                                     </tr>
                                 ) : (
                                     sortedCategories.map((category) => {
-                                        const IconComponent = category.icon && (LucideIcons as any)[category.icon]
-                                            ? (LucideIcons as any)[category.icon]
+                                        const IconComponent = category.icon && (LucideIcons as unknown as Record<string, React.ElementType>)[category.icon]
+                                            ? (LucideIcons as unknown as Record<string, React.ElementType>)[category.icon]
                                             : LucideIcons.Folder;
 
                                         return (
@@ -138,7 +146,7 @@ export default function CategoryPage() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <Badge variant={getBadgeVariant(category.type) as any} className="text-[10px] px-2 py-0.5 uppercase">
+                                                    <Badge variant={getBadgeVariant(category.type)} className="text-[10px] px-2 py-0.5 uppercase">
                                                         {category.type}
                                                     </Badge>
                                                 </td>
@@ -194,6 +202,18 @@ export default function CategoryPage() {
                     </Card>
                 </div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={!!categoryToDelete}
+                onClose={() => setCategoryToDelete(null)}
+                onConfirm={confirmDelete}
+                title="Delete Category"
+                message="Are you sure you want to delete this category? This action cannot be undone."
+                confirmText="Yes, delete"
+                cancelText="Cancel"
+                variant="danger"
+            />
         </div>
     );
 }

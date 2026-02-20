@@ -1,7 +1,16 @@
-import { supabase, getDevUserId } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import type { Category, Transaction, BudgetGoal } from '../types';
 import type { Database } from '../types/database.types';
 import { VARIABLE_CATEGORY_ID } from '../lib/constants';
+
+// Helper to enforce authentication at the service layer
+const requireUser = async (): Promise<string> => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        throw new Error('Unauthorized: No active session');
+    }
+    return user.id;
+};
 
 // ─── Database row / payload type aliases ─────────────────────────────────────
 type CategoryRow = Database['public']['Tables']['categories']['Row'];
@@ -60,7 +69,7 @@ const mapBudget = (row: BudgetRow): BudgetGoal => ({
  * Fetch all categories for the current user
  */
 export const fetchCategories = async (): Promise<Category[]> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
 
     const { data, error } = await supabase
         .from('categories')
@@ -79,7 +88,7 @@ export const fetchCategories = async (): Promise<Category[]> => {
  * Fetch all transactions for the current user
  */
 export const fetchTransactions = async (): Promise<Transaction[]> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
 
     const { data, error } = await supabase
         .from('transactions')
@@ -101,7 +110,7 @@ export const fetchTransactionsByMonth = async (
     date: Date,
     type?: Transaction['type']
 ): Promise<Transaction[]> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
     const month = date.getMonth() + 1; // 1-indexed
     const year = date.getFullYear();
 
@@ -138,7 +147,7 @@ export const fetchTransactionsByMonth = async (
  * Fetch budget goals for the current user, optionally filtered by month
  */
 export const fetchBudgets = async (date?: Date): Promise<BudgetGoal[]> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
 
     let query = supabase
         .from('budgets')
@@ -169,7 +178,7 @@ export const fetchBudgets = async (date?: Date): Promise<BudgetGoal[]> => {
  * for a clean single-request operation.
  */
 export const setMonthlyVariableBudget = async (date: Date, amount: number): Promise<BudgetGoal> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     const dateStr = `${year}-${String(month).padStart(2, '0')}-01`;
@@ -202,7 +211,7 @@ export const setMonthlyVariableBudget = async (date: Date, amount: number): Prom
 export const createTransaction = async (
     transaction: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<Transaction> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
 
     const payload: TransactionInsert = {
         id: crypto.randomUUID(),
@@ -235,7 +244,7 @@ export const updateTransaction = async (
     id: string,
     updates: Partial<Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
 ): Promise<Transaction> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
 
     // Build a partial update containing only the fields that actually changed.
     const updateData: TransactionUpdate = {};
@@ -265,7 +274,7 @@ export const updateTransaction = async (
  * Delete a transaction
  */
 export const deleteTransaction = async (id: string): Promise<void> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
 
     const { error } = await supabase
         .from('transactions')
@@ -284,7 +293,7 @@ export const deleteTransaction = async (id: string): Promise<void> => {
 export const createCategory = async (
     category: Omit<Category, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
 ): Promise<Category> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
 
     const payload: CategoryInsert = {
         id: crypto.randomUUID(),
@@ -315,7 +324,7 @@ export const updateCategory = async (
     id: string,
     updates: Partial<Omit<Category, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
 ): Promise<Category> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
 
     const updateData: CategoryUpdate = {};
     if (updates.name !== undefined) updateData.name = updates.name;
@@ -342,7 +351,7 @@ export const updateCategory = async (
  * Delete a category
  */
 export const deleteCategory = async (id: string): Promise<void> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
 
     const { error } = await supabase
         .from('categories')
@@ -361,7 +370,7 @@ export const deleteCategory = async (id: string): Promise<void> => {
 export const createMultipleTransactions = async (
     transactions: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>[]
 ): Promise<Transaction[]> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
 
     const payloads: TransactionInsert[] = transactions.map(tx => ({
         id: crypto.randomUUID(),
@@ -393,7 +402,7 @@ export const deleteTransactionsByMonthAndType = async (
     date: Date,
     type: Transaction['type']
 ): Promise<void> => {
-    const userId = getDevUserId();
+    const userId = await requireUser();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
 

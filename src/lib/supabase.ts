@@ -27,10 +27,11 @@ export const supabase: SupabaseClient<Database> = createClient<Database>(
 );
 
 /**
- * Development helper to get current user ID
- * Falls back to env variable for RLS-enabled development
+ * @deprecated Use Supabase authentication sessions (`supabase.auth.getUser()`) for production environments. 
+ * This is a development fallback only.
  */
 export const getDevUserId = (): string => {
+    console.warn('DEPRECATION WARNING: getDevUserId() is deprecated. UI should use real Supabase Auth sessions.')
     const devUserId = import.meta.env.VITE_DEV_USER_ID;
 
     if (!devUserId) {

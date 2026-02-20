@@ -7,8 +7,12 @@ import {
     BarChart3,
     Wallet,
     Tags,
+    LogOut,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
+import { useAuth } from '../../context/AuthContext'
+import { supabase } from '../../lib/supabase'
+import { useRouter } from '@tanstack/react-router'
 
 const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -20,6 +24,14 @@ const navItems = [
 ]
 
 export function Sidebar({ className, onLinkClick }: { className?: string; onLinkClick?: () => void }) {
+    const { user } = useAuth()
+    const router = useRouter()
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut()
+        router.navigate({ to: '/login', replace: true })
+    }
+
     return (
         <aside
             className={cn(
@@ -51,19 +63,28 @@ export function Sidebar({ className, onLinkClick }: { className?: string; onLink
             </nav>
 
             <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-                <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/50 flex items-center gap-3">
-                    {/* Placeholder Avatar */}
-                    <div className="w-10 h-10 rounded-full bg-brand-primary/20 border-2 border-brand-primary/20 flex items-center justify-center text-brand-primary font-bold">
-                        AR
+                <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/50 flex flex-col gap-3">
+                    <div className="flex items-center gap-3">
+                        {/* Avatar */}
+                        <div className="w-10 h-10 rounded-full bg-brand-primary/20 flex items-center justify-center text-brand-primary font-bold uppercase shrink-0">
+                            {user?.email?.charAt(0) || 'U'}
+                        </div>
+                        <div className="overflow-hidden flex-1">
+                            <p className="text-sm font-medium truncate text-slate-900 dark:text-slate-100">
+                                {user?.user_metadata?.full_name || 'User'}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                {user?.email}
+                            </p>
+                        </div>
                     </div>
-                    <div className="overflow-hidden">
-                        <p className="text-sm font-semibold truncate text-slate-900 dark:text-slate-100">
-                            Alex Reynolds
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                            Pro Account
-                        </p>
-                    </div>
+                    <button
+                        onClick={handleLogout}
+                        className="flex items-center justify-center gap-2 w-full py-2 px-3 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-brand-danger hover:bg-brand-danger/10 rounded-lg transition-colors mt-2"
+                    >
+                        <LogOut className="w-4 h-4" />
+                        Log out
+                    </button>
                 </div>
             </div>
         </aside>

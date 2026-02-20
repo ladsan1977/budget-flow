@@ -17,7 +17,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
     const inputValue = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`
 
     return (
-        <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-brand-surface/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 w-full">
+        <header className="h-16 shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-brand-surface/80 backdrop-blur-md flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 w-full">
             <div className="flex items-center gap-4">
                 {/* Mobile Menu Button */}
                 <Button variant="ghost" size="icon" className="md:hidden" onClick={onMenuClick}>

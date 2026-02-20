@@ -7,17 +7,22 @@ import { useCategories } from '../../hooks/useCategories';
 import { useTransactionsByMonth } from '../../hooks/useTransactions';
 import { QueryErrorFallback } from '../../components/ui/QueryErrorFallback';
 import { formatCurrency, cn } from '../../lib/utils';
-import { Plus, Search, CheckCircle2, Clock } from 'lucide-react';
-import type { TransactionType } from '../../types';
+import { Plus, Search, CheckCircle2, Clock, Edit2, X } from 'lucide-react';
+import type { Transaction, TransactionType } from '../../types';
 import { TransactionModal } from '../../components/transactions/TransactionModal';
+import { ConfirmModal } from '../../components/common/ConfirmModal';
+import { useDeleteTransaction } from '../../hooks/useTransactionMutations';
 
 export default function TransactionsPage() {
 
     // Server state is now sufficient since we invalidate queries on success
     const { data: transactions = [], error, refetch } = useTransactionsByMonth();
     const { data: categories = [] } = useCategories();
+    const deleteMutation = useDeleteTransaction();
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+    const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
 
     if (error) {
         return <QueryErrorFallback error={error} resetErrorBoundary={refetch} title="Failed to load transactions" />;
@@ -26,7 +31,7 @@ export default function TransactionsPage() {
     const getBadgeVariant = (txType: TransactionType) => {
         switch (txType) {
             case 'income': return 'success';
-            case 'fixed': return 'default'; // Indigo/Primary
+            case 'fixed': return 'primary'; // Indigo/Primary
             case 'variable': return 'warning';
             default: return 'outline';
         }
@@ -53,7 +58,7 @@ export default function TransactionsPage() {
                             className="h-10 w-full md:w-[200px] rounded-lg border border-slate-200 bg-white px-9 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary dark:border-slate-800 dark:bg-brand-surface dark:text-slate-100"
                         />
                     </div>
-                    <Button onClick={() => setIsModalOpen(true)} className="gap-2 shadow-lg shadow-brand-primary/20">
+                    <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 shadow-lg shadow-brand-primary/20">
                         <Plus className="h-4 w-4" />
                         Add Transaction
                     </Button>
@@ -61,10 +66,10 @@ export default function TransactionsPage() {
             </div>
 
             {/* Main Table Card */}
-            <Card className="overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface">
-                <div className="overflow-x-auto">
+            <Card className="overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex flex-col max-h-[600px]">
+                <div className="overflow-y-auto flex-1">
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50 text-slate-500 dark:bg-slate-900/50 dark:text-slate-400">
+                        <thead className="bg-slate-50 text-slate-500 dark:bg-slate-900/50 dark:text-slate-400 sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-4 font-medium">Date</th>
                                 <th className="px-6 py-4 font-medium">Description</th>
@@ -72,6 +77,7 @@ export default function TransactionsPage() {
                                 <th className="px-6 py-4 font-medium">Type</th>
                                 <th className="px-6 py-4 font-medium">Status</th>
                                 <th className="px-6 py-4 font-medium text-right">Amount</th>
+                                <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -116,6 +122,26 @@ export default function TransactionsPage() {
                                         )}>
                                             {tx.type === 'income' ? '+' : ''}{formatCurrency(tx.amount)}
                                         </td>
+                                        <td className="px-6 py-4 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-slate-400 hover:text-brand-primary"
+                                                    onClick={() => setEditingTransaction(tx)}
+                                                >
+                                                    <Edit2 className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-slate-400 hover:text-red-500"
+                                                    onClick={() => setTransactionToDelete(tx.id)}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </td>
                                     </tr>
                                 );
                             })}
@@ -129,10 +155,31 @@ export default function TransactionsPage() {
                 )}
             </Card>
 
-            {/* Add Transaction Modal */}
+            {/* Add/Edit Transaction Modal */}
             <TransactionModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                isOpen={isAddModalOpen || !!editingTransaction}
+                onClose={() => {
+                    setIsAddModalOpen(false);
+                    setEditingTransaction(null);
+                }}
+                initialData={editingTransaction}
+            />
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={!!transactionToDelete}
+                onClose={() => setTransactionToDelete(null)}
+                onConfirm={() => {
+                    if (transactionToDelete) {
+                        deleteMutation.mutate(transactionToDelete);
+                        setTransactionToDelete(null);
+                    }
+                }}
+                title="Delete Transaction"
+                message="Are you sure you want to delete this transaction? This action cannot be undone."
+                confirmText="Yes, delete"
+                cancelText="Cancel"
+                variant="danger"
             />
         </div>
     );

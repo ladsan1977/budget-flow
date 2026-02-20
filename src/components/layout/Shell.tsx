@@ -1,11 +1,17 @@
 import { useState } from 'react'
-import { Outlet } from '@tanstack/react-router'
+import { Outlet, useLocation } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 
 export function Shell() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const location = useLocation()
+
+    // Hide standard layout wrapper on auth pages
+    if (location.pathname === '/login') {
+        return <Outlet />
+    }
 
     return (
         <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-brand-background">

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as VariableBudgetRouteImport } from './routes/variable-budget'
 import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as FixedExpensesRouteImport } from './routes/fixed-expenses'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as IndexRouteImport } from './routes/index'
@@ -29,6 +30,11 @@ const TransactionsRoute = TransactionsRouteImport.update({
 const ReportsRoute = ReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FixedExpensesRoute = FixedExpensesRouteImport.update({
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/fixed-expenses': typeof FixedExpensesRoute
+  '/login': typeof LoginRoute
   '/reports': typeof ReportsRoute
   '/transactions': typeof TransactionsRoute
   '/variable-budget': typeof VariableBudgetRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/fixed-expenses': typeof FixedExpensesRoute
+  '/login': typeof LoginRoute
   '/reports': typeof ReportsRoute
   '/transactions': typeof TransactionsRoute
   '/variable-budget': typeof VariableBudgetRoute
@@ -68,6 +76,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/categories': typeof CategoriesRoute
   '/fixed-expenses': typeof FixedExpensesRoute
+  '/login': typeof LoginRoute
   '/reports': typeof ReportsRoute
   '/transactions': typeof TransactionsRoute
   '/variable-budget': typeof VariableBudgetRoute
@@ -78,6 +87,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/fixed-expenses'
+    | '/login'
     | '/reports'
     | '/transactions'
     | '/variable-budget'
@@ -86,6 +96,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/fixed-expenses'
+    | '/login'
     | '/reports'
     | '/transactions'
     | '/variable-budget'
@@ -94,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/categories'
     | '/fixed-expenses'
+    | '/login'
     | '/reports'
     | '/transactions'
     | '/variable-budget'
@@ -103,6 +115,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CategoriesRoute: typeof CategoriesRoute
   FixedExpensesRoute: typeof FixedExpensesRoute
+  LoginRoute: typeof LoginRoute
   ReportsRoute: typeof ReportsRoute
   TransactionsRoute: typeof TransactionsRoute
   VariableBudgetRoute: typeof VariableBudgetRoute
@@ -129,6 +142,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/fixed-expenses': {
@@ -159,6 +179,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CategoriesRoute: CategoriesRoute,
   FixedExpensesRoute: FixedExpensesRoute,
+  LoginRoute: LoginRoute,
   ReportsRoute: ReportsRoute,
   TransactionsRoute: TransactionsRoute,
   VariableBudgetRoute: VariableBudgetRoute,

@@ -1,21 +1,21 @@
 
 import { useState, useMemo } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { useTransactionsByMonth } from '../../hooks/useTransactions';
-import { useCategories } from '../../hooks/useCategories';
-import { QueryErrorFallback } from '../../components/ui/QueryErrorFallback';
-import { formatCurrency, cn } from '../../lib/utils';
-import { Copy, X, Calendar, Plus } from 'lucide-react';
-import { CurrencyInput } from '../../components/ui/CurrencyInput';
-import type { Transaction } from '../../types';
-import { useDate } from '../../context/DateContext';
-import { useDeleteTransaction, useUpdateTransaction, useBulkCreateTransactions, useBulkDeleteTransactions } from '../../hooks/useTransactionMutations';
-import { TransactionModal } from '../../components/transactions/TransactionModal';
-import { InfoModal } from '../../components/common/InfoModal';
-import { ConfirmModal } from '../../components/common/ConfirmModal';
-import { shiftDateToTargetMonth } from '../../lib/utils';
-import { fetchTransactionsByMonth } from '../../services/supabaseData';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { useTransactionsByMonth } from '../hooks/useTransactions';
+import { useCategories } from '../hooks/useCategories';
+import { QueryErrorFallback } from '../components/ui/QueryErrorFallback';
+import { formatCurrency, cn } from '../lib/utils';
+import { Copy, X, Calendar, Plus, Edit2 } from 'lucide-react';
+import { CurrencyInput } from '../components/ui/CurrencyInput';
+import type { Transaction } from '../types';
+import { useDate } from '../context/DateContext';
+import { useDeleteTransaction, useUpdateTransaction, useBulkCreateTransactions, useBulkDeleteTransactions } from '../hooks/useTransactionMutations';
+import { TransactionModal } from '../components/transactions/TransactionModal';
+import { InfoModal } from '../components/common/InfoModal';
+import { ConfirmModal } from '../components/common/ConfirmModal';
+import { shiftDateToTargetMonth } from '../lib/utils';
+import { fetchTransactionsByMonth } from '../services/supabaseData';
 
 export default function FixedExpensesPage() {
     const { currentDate, monthName, year } = useDate();
@@ -23,9 +23,6 @@ export default function FixedExpensesPage() {
     const { data: transactions = [], error } = useTransactionsByMonth('fixed');
     const { data: categories = [] } = useCategories();
 
-    if (error) {
-        return <QueryErrorFallback error={error} title="Failed to load fixed expenses" />;
-    }
 
     // Helper formatted string YYYY-MM
     const currentMonthStr = useMemo(() => {
@@ -46,10 +43,12 @@ export default function FixedExpensesPage() {
 
     const [isReplicateModalOpen, setIsReplicateModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [draftTransactions, setDraftTransactions] = useState<Transaction[]>([]);
     const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
     const [infoMessage, setInfoMessage] = useState('');
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
 
     const bulkCreateMutation = useBulkCreateTransactions();
     const bulkDeleteMutation = useBulkDeleteTransactions();
@@ -74,6 +73,10 @@ export default function FixedExpensesPage() {
 
     const totalItems = currentMonthFixedExpenses.length;
     const pendingCount = totalItems - completedCount;
+
+    if (error) {
+        return <QueryErrorFallback error={error} title="Failed to load fixed expenses" />;
+    }
 
     const handleReplicateClick = async () => {
         const [year, month] = currentMonthStr.split('-').map(Number);
@@ -144,7 +147,7 @@ export default function FixedExpensesPage() {
         });
     };
 
-    const handleDraftChange = (id: string, field: keyof Transaction, value: any) => {
+    const handleDraftChange = (id: string, field: keyof Transaction, value: Transaction[keyof Transaction]) => {
         setDraftTransactions(prev => prev.map(tx =>
             tx.id === id ? { ...tx, [field]: value } : tx
         ));
@@ -228,10 +231,10 @@ export default function FixedExpensesPage() {
             </div>
 
             {/* Expenses Table */}
-            <Card className="overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface">
-                <div className="overflow-x-auto">
+            <Card className="overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex flex-col max-h-[500px]">
+                <div className="overflow-y-auto flex-1">
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-white border-b border-slate-100 text-slate-500 dark:bg-brand-surface dark:border-slate-800 dark:text-slate-400">
+                        <thead className="bg-white border-b border-slate-100 text-slate-500 dark:bg-brand-surface dark:border-slate-800 dark:text-slate-400 sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-4 font-medium">Category / Service</th>
                                 <th className="px-6 py-4 font-medium">Due Date</th>
@@ -288,8 +291,16 @@ export default function FixedExpensesPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
+                                                    className="h-8 w-8 p-0 text-slate-400 hover:text-brand-primary"
+                                                    onClick={() => setEditingTransaction(tx)}
+                                                >
+                                                    <Edit2 className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
                                                     className="h-8 w-8 p-0 text-slate-400 hover:text-red-500"
-                                                    onClick={() => deleteMutation.mutate(tx.id)}
+                                                    onClick={() => setTransactionToDelete(tx.id)}
                                                 >
                                                     <X className="h-4 w-4" />
                                                 </Button>
@@ -370,12 +381,16 @@ export default function FixedExpensesPage() {
                     </Card>
                 </div>
             )}
-            {/* Add Transaction Modal */}
+            {/* Add/Edit Transaction Modal */}
             <TransactionModal
-                isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
+                isOpen={isAddModalOpen || !!editingTransaction}
+                onClose={() => {
+                    setIsAddModalOpen(false);
+                    setEditingTransaction(null);
+                }}
                 initialType="fixed"
                 lockType={true}
+                initialData={editingTransaction}
             />
 
             {/* Clone Last Month Modals */}
@@ -392,6 +407,21 @@ export default function FixedExpensesPage() {
                 title="Overwrite current month"
                 message={"You already have fixed expenses registered for this month.\n\nIf you clone the previous month, ALL the fixed expenses of the current month will be permanently deleted and replaced.\n\nDo you want to continue?"}
                 confirmText="Yes, overwrite"
+                cancelText="Cancel"
+                variant="danger"
+            />
+            <ConfirmModal
+                isOpen={!!transactionToDelete}
+                onClose={() => setTransactionToDelete(null)}
+                onConfirm={() => {
+                    if (transactionToDelete) {
+                        deleteMutation.mutate(transactionToDelete);
+                        setTransactionToDelete(null);
+                    }
+                }}
+                title="Delete Expense"
+                message="Are you sure you want to delete this expense? This action cannot be undone."
+                confirmText="Yes, delete"
                 cancelText="Cancel"
                 variant="danger"
             />

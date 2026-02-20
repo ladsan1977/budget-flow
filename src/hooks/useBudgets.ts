@@ -2,14 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchBudgets } from '../services/supabaseData';
 import type { BudgetGoal } from '../types';
 import { VARIABLE_CATEGORY_ID } from '../lib/constants';
+import { useAuth } from '../context/AuthContext';
 
 export function useBudgets(date?: Date) {
+    const { user } = useAuth();
     // If date is provided, create a cache key that includes the month/year
-    const queryKey = ['budgets', date ? `${date.getFullYear()}-${date.getMonth()}` : 'all'];
+    const queryKey = ['budgets', date ? `${date.getFullYear()}-${date.getMonth()}` : 'all', user?.id];
 
     return useQuery<BudgetGoal[], Error>({
         queryKey,
         queryFn: () => fetchBudgets(date),
+        enabled: !!user,
         staleTime: 5 * 60 * 1000, // 5 minutes
     });
 }

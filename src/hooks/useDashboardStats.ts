@@ -3,6 +3,7 @@ import { fetchTransactionsByMonth, fetchBudgets } from '../services/supabaseData
 import { VARIABLE_CATEGORY_ID } from '../lib/constants';
 import type { DashboardStats } from '../types';
 import type { Transaction, BudgetGoal } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Computes DashboardStats from raw query data entirely on the client.
@@ -52,17 +53,20 @@ function computeStats(
 export function useDashboardStats(currentDate: Date) {
     const month = currentDate.getMonth() + 1;
     const year = currentDate.getFullYear();
+    const { user } = useAuth();
 
     const [txQuery, budgetQuery] = useQueries({
         queries: [
             {
-                queryKey: ['transactions', 'by-month', year, month],
+                queryKey: ['transactions', 'by-month', year, month, undefined, user?.id],
                 queryFn: () => fetchTransactionsByMonth(currentDate),
+                enabled: !!user,
                 staleTime: 1 * 60 * 1000, // 1 minute
             },
             {
-                queryKey: ['budgets', `${year}-${month - 1}`], // matches useBudgets key
+                queryKey: ['budgets', `${year}-${month - 1}`, user?.id], // matches useBudgets key
                 queryFn: () => fetchBudgets(currentDate),
+                enabled: !!user,
                 staleTime: 5 * 60 * 1000, // 5 minutes
             },
         ],
