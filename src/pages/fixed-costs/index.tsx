@@ -10,7 +10,12 @@ import { Copy, X, Calendar, Plus } from 'lucide-react';
 import { CurrencyInput } from '../../components/ui/CurrencyInput';
 import type { Transaction } from '../../types';
 import { useDate } from '../../context/DateContext';
-import { useCreateTransaction, useDeleteTransaction, useUpdateTransaction } from '../../hooks/useTransactionMutations';
+import { useDeleteTransaction, useUpdateTransaction, useBulkCreateTransactions, useBulkDeleteTransactions } from '../../hooks/useTransactionMutations';
+import { TransactionModal } from '../../components/transactions/TransactionModal';
+import { InfoModal } from '../../components/common/InfoModal';
+import { ConfirmModal } from '../../components/common/ConfirmModal';
+import { shiftDateToTargetMonth } from '../../lib/utils';
+import { fetchTransactionsByMonth } from '../../services/supabaseData';
 
 export default function FixedExpensesPage() {
     const { currentDate, monthName, year } = useDate();
@@ -30,7 +35,6 @@ export default function FixedExpensesPage() {
     }, [currentDate]);
 
     // Mutations
-    const createMutation = useCreateTransaction();
     const deleteMutation = useDeleteTransaction();
     const updateMutation = useUpdateTransaction();
 
@@ -41,7 +45,14 @@ export default function FixedExpensesPage() {
     // const transactions = serverTransactions; // Removed incorrect redeclaration
 
     const [isReplicateModalOpen, setIsReplicateModalOpen] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [draftTransactions, setDraftTransactions] = useState<Transaction[]>([]);
+    const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+    const [infoMessage, setInfoMessage] = useState('');
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+    const bulkCreateMutation = useBulkCreateTransactions();
+    const bulkDeleteMutation = useBulkDeleteTransactions();
 
     // Filter transactions for the current viewing month (API already does this but good to double check or align with previous logic)
     const currentMonthFixedExpenses = useMemo(() => {
@@ -64,57 +75,65 @@ export default function FixedExpensesPage() {
     const totalItems = currentMonthFixedExpenses.length;
     const pendingCount = totalItems - completedCount;
 
-    const getPreviousMonth = (monthStr: string) => {
-        const [year, month] = monthStr.split('-').map(Number);
-        let prevMonth = month - 1;
-        let prevYear = year;
-        if (prevMonth === 0) {
-            prevMonth = 12;
-            prevYear = year - 1;
+    const handleReplicateClick = async () => {
+        const [year, month] = currentMonthStr.split('-').map(Number);
+        // To get the first day of the previous month safely:
+        const prevMonthDate = new Date(year, month - 2, 1);
+
+        try {
+            const prevMonthTxs = await fetchTransactionsByMonth(prevMonthDate, 'fixed');
+
+            if (prevMonthTxs.length === 0) {
+                setInfoMessage(`There are no fixed expenses registered for the previous month to clone.`);
+                setIsInfoModalOpen(true);
+                return;
+            }
+
+            // Create drafts
+            const drafts = prevMonthTxs.map(tx => {
+                const newDateStr = shiftDateToTargetMonth(tx.date, year, month);
+                return {
+                    ...tx,
+                    id: `replicated_${Date.now()}_${tx.id}`,
+                    date: newDateStr,
+                    isPaid: false,
+                };
+            });
+
+            setDraftTransactions(drafts);
+            setIsReplicateModalOpen(true);
+        } catch (err) {
+            setInfoMessage('Error loading previous month expenses: ' + (err as Error).message);
+            setIsInfoModalOpen(true);
         }
-        return `${prevYear}-${prevMonth.toString().padStart(2, '0')}`;
-    };
-
-    const handleReplicateClick = () => {
-        const prevMonthStr = getPreviousMonth(currentMonthStr);
-        const prevMonthTxs = transactions.filter(tx =>
-            tx.type === 'fixed' && tx.date.startsWith(prevMonthStr)
-        );
-
-        if (prevMonthTxs.length === 0) {
-            alert(`No fixed expenses found in ${prevMonthStr} to replicate.`);
-            return;
-        }
-
-        // Create drafts
-        const drafts = prevMonthTxs.map(tx => {
-            const day = tx.date.split('-')[2];
-            return {
-                ...tx,
-                id: `replicated_${Date.now()}_${tx.id}`, // Assign a temporary unique ID for draft
-                // Use currentMonthStr directly
-                date: `${currentMonthStr}-${day}`,
-                isPaid: false, // Reset status
-            };
-        });
-
-        setDraftTransactions(drafts);
-        setIsReplicateModalOpen(true);
     };
 
     const handleConfirmReplication = () => {
-        draftTransactions.forEach(tx => {
-            createMutation.mutate({
-                description: tx.description,
-                amount: tx.amount,
-                date: tx.date, // Already formatted for current month in openReplicateModal
-                categoryId: tx.categoryId,
-                type: 'fixed',
-                isPaid: false,
-            });
-        });
+        if (currentMonthFixedExpenses.length > 0) {
+            setIsConfirmModalOpen(true);
+        } else {
+            proceedWithReplication();
+        }
+    };
 
+    const proceedWithReplication = async () => {
         setIsReplicateModalOpen(false);
+        setIsConfirmModalOpen(false);
+
+        if (currentMonthFixedExpenses.length > 0) {
+            await bulkDeleteMutation.mutateAsync({ date: currentDate, type: 'fixed' });
+        }
+
+        const payloads = draftTransactions.map(tx => ({
+            description: tx.description,
+            amount: tx.amount,
+            date: tx.date,
+            categoryId: tx.categoryId,
+            type: 'fixed' as const,
+            isPaid: false,
+        }));
+
+        await bulkCreateMutation.mutateAsync(payloads);
         setDraftTransactions([]);
     };
 
@@ -156,7 +175,7 @@ export default function FixedExpensesPage() {
                         <Copy className="h-4 w-4" />
                         Clone Last Month
                     </Button>
-                    <Button variant="outline" className="gap-2 bg-white">
+                    <Button onClick={() => setIsAddModalOpen(true)} variant="outline" className="gap-2 bg-white">
                         <Plus className="h-4 w-4" />
                         New Expense
                     </Button>
@@ -351,6 +370,31 @@ export default function FixedExpensesPage() {
                     </Card>
                 </div>
             )}
+            {/* Add Transaction Modal */}
+            <TransactionModal
+                isOpen={isAddModalOpen}
+                onClose={() => setIsAddModalOpen(false)}
+                initialType="fixed"
+                lockType={true}
+            />
+
+            {/* Clone Last Month Modals */}
+            <InfoModal
+                isOpen={isInfoModalOpen}
+                onClose={() => setIsInfoModalOpen(false)}
+                title="Info"
+                message={infoMessage}
+            />
+            <ConfirmModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={proceedWithReplication}
+                title="Overwrite current month"
+                message={"You already have fixed expenses registered for this month.\n\nIf you clone the previous month, ALL the fixed expenses of the current month will be permanently deleted and replaced.\n\nDo you want to continue?"}
+                confirmText="Yes, overwrite"
+                cancelText="Cancel"
+                variant="danger"
+            />
         </div>
     );
 }

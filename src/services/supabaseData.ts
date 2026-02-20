@@ -353,4 +353,64 @@ export const deleteCategory = async (id: string): Promise<void> => {
     if (error) {
         throw new Error(`Failed to delete category: ${error.message}`);
     }
+}
+
+/**
+ * Bulk create transactions
+ */
+export const createMultipleTransactions = async (
+    transactions: Omit<Transaction, 'id' | 'userId' | 'createdAt' | 'updatedAt'>[]
+): Promise<Transaction[]> => {
+    const userId = getDevUserId();
+
+    const payloads: TransactionInsert[] = transactions.map(tx => ({
+        id: crypto.randomUUID(),
+        user_id: userId,
+        amount: tx.amount,
+        date: tx.date,
+        description: tx.description,
+        category_id: tx.categoryId,
+        type: tx.type,
+        is_paid: tx.isPaid,
+    }));
+
+    const { data, error } = await supabase
+        .from('transactions')
+        .insert(payloads)
+        .select();
+
+    if (error) {
+        throw new Error(`Failed to create multiple transactions: ${error.message}`);
+    }
+
+    return (data || []).map(mapTransaction);
 };
+
+/**
+ * Bulk delete transactions for a specific month and type
+ */
+export const deleteTransactionsByMonthAndType = async (
+    date: Date,
+    type: Transaction['type']
+): Promise<void> => {
+    const userId = getDevUserId();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const nextYear = month === 12 ? year + 1 : year;
+    const endDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-01`;
+
+    const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('user_id', userId)
+        .eq('type', type)
+        .gte('date', startDate)
+        .lt('date', endDate);
+
+    if (error) {
+        throw new Error(`Failed to delete transactions: ${error.message}`);
+    }
+};;

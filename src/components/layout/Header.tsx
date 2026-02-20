@@ -51,7 +51,7 @@ export function Header({ onMenuClick }: { onMenuClick?: () => void }) {
             </div>
 
             <div className="flex items-center gap-4">
-                <Button variant="primary" size="sm" className="gap-2 shadow-lg shadow-brand-primary/20">
+                <Button variant="primary" size="sm" className="gap-2 shadow-lg shadow-brand-primary/20" style={{ visibility: 'hidden' }} >
                     <Plus className="w-4 h-4" />
                     <span>Quick-Add</span>
                 </Button>
