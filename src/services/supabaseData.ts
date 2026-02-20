@@ -10,6 +10,8 @@ type TransactionInsert = Database['public']['Tables']['transactions']['Insert'];
 type TransactionUpdate = Database['public']['Tables']['transactions']['Update'];
 type BudgetRow = Database['public']['Tables']['budgets']['Row'];
 type BudgetInsert = Database['public']['Tables']['budgets']['Insert'];
+type CategoryInsert = Database['public']['Tables']['categories']['Insert'];
+type CategoryUpdate = Database['public']['Tables']['categories']['Update'];
 
 /**
  * Convert database category to app Category type
@@ -203,6 +205,7 @@ export const createTransaction = async (
     const userId = getDevUserId();
 
     const payload: TransactionInsert = {
+        id: crypto.randomUUID(),
         user_id: userId,
         amount: transaction.amount,
         date: transaction.date,
@@ -272,5 +275,82 @@ export const deleteTransaction = async (id: string): Promise<void> => {
 
     if (error) {
         throw new Error(`Failed to delete transaction: ${error.message}`);
+    }
+};
+
+/**
+ * Create a new category
+ */
+export const createCategory = async (
+    category: Omit<Category, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+): Promise<Category> => {
+    const userId = getDevUserId();
+
+    const payload: CategoryInsert = {
+        id: crypto.randomUUID(),
+        name: category.name,
+        type: category.type,
+        icon: category.icon || null,
+        color: category.color || null,
+        user_id: userId,
+    };
+
+    const { data, error } = await supabase
+        .from('categories')
+        .insert(payload)
+        .select()
+        .single();
+
+    if (error) {
+        throw new Error(`Failed to create category: ${error.message}`);
+    }
+
+    return mapCategory(data);
+};
+
+/**
+ * Update an existing category
+ */
+export const updateCategory = async (
+    id: string,
+    updates: Partial<Omit<Category, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>
+): Promise<Category> => {
+    const userId = getDevUserId();
+
+    const updateData: CategoryUpdate = {};
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.type !== undefined) updateData.type = updates.type;
+    if (updates.icon !== undefined) updateData.icon = updates.icon || null;
+    if (updates.color !== undefined) updateData.color = updates.color || null;
+
+    const { data, error } = await supabase
+        .from('categories')
+        .update(updateData)
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select()
+        .single();
+
+    if (error) {
+        throw new Error(`Failed to update category: ${error.message}`);
+    }
+
+    return mapCategory(data);
+};
+
+/**
+ * Delete a category
+ */
+export const deleteCategory = async (id: string): Promise<void> => {
+    const userId = getDevUserId();
+
+    const { error } = await supabase
+        .from('categories')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId);
+
+    if (error) {
+        throw new Error(`Failed to delete category: ${error.message}`);
     }
 };

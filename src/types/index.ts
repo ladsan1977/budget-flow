@@ -58,3 +58,20 @@ export interface DashboardStats {
     variableBudgetLimit: number;
     variableBudgetPercent: number;
 }
+
+/**
+ * Represents a single category's aggregated variable spending.
+ * Used by the "Variable Breakdown" section of the Dashboard.
+ */
+export interface CategoryBreakdown {
+    /** The category ID (or a fallback key for uncategorized transactions). */
+    categoryId: string;
+    /** Display name: category name, or fallback to description, or 'Uncategorized'. */
+    name: string;
+    /** Tailwind color class from the Category, e.g. 'text-emerald-500'. */
+    color?: string;
+    /** Sum of all variable transaction amounts for this category in the period. */
+    totalAmount: number;
+    /** Percentage of totalAmount relative to the global variable budget limit (0–100+). */
+    percentOfBudget: number;
+}

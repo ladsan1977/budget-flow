@@ -5,8 +5,8 @@ import {
     PieChart,
     History,
     BarChart3,
-    Settings,
     Wallet,
+    Tags,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -15,6 +15,7 @@ const navItems = [
     { to: '/fixed-expenses', label: 'Fixed Expenses', icon: Receipt },
     { to: '/variable-budget', label: 'Variable Budget', icon: PieChart },
     { to: '/transactions', label: 'Transaction History', icon: History },
+    { to: '/categories', label: 'Categories', icon: Tags },
     { to: '/reports', label: 'Reports', icon: BarChart3 },
 ]
 
@@ -50,15 +51,7 @@ export function Sidebar({ className, onLinkClick }: { className?: string; onLink
             </nav>
 
             <div className="p-4 border-t border-slate-200 dark:border-slate-800">
-                <Link
-                    to="/settings"
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-brand-primary/10 hover:text-brand-primary transition-colors [&.active]:bg-brand-primary/10 [&.active]:text-brand-primary font-medium"
-                >
-                    <Settings className="w-5 h-5" />
-                    Settings
-                </Link>
-
-                <div className="mt-4 p-4 rounded-xl bg-slate-100 dark:bg-slate-900/50 flex items-center gap-3">
+                <div className="p-4 rounded-xl bg-slate-100 dark:bg-slate-900/50 flex items-center gap-3">
                     {/* Placeholder Avatar */}
                     <div className="w-10 h-10 rounded-full bg-brand-primary/20 border-2 border-brand-primary/20 flex items-center justify-center text-brand-primary font-bold">
                         AR
