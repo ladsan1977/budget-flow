@@ -91,9 +91,9 @@ export default function DashboardPage() {
             : '#10B981'; // brand-success
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-y-6 md:gap-4 lg:gap-6 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="sticky top-16 md:top-0 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 md:static md:m-0 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none flex flex-col gap-4">
+            <div className="col-span-1 md:col-span-2 lg:col-span-7 order-1 sticky top-16 md:top-0 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 md:static md:m-0 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none flex flex-col gap-4">
                 <div className="flex flex-row items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
@@ -118,8 +118,76 @@ export default function DashboardPage() {
                 </div>
             </div>
 
+            {/* Global Variable Goal - Main Feature */}
+            <Card className="col-span-1 md:col-span-2 lg:col-span-4 order-2 md:order-3 border-brand-primary/20 bg-gradient-to-br from-white to-slate-50 dark:from-brand-surface dark:to-slate-900">
+                <CardHeader>
+                    <div className="flex items-center justify-between">
+                        <CardTitle>Global Variable Goal</CardTitle>
+                    </div>
+                    <CardDescription>
+                        Your spending limit for all extra expenses this month.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col md:flex-row items-center justify-center gap-8 py-8">
+
+                    {/* Circular Gauge */}
+                    <div className="relative h-48 w-48 flex items-center justify-center">
+                        <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
+                            {/* Background Circle */}
+                            <circle
+                                className="text-slate-200 dark:text-slate-700"
+                                strokeWidth="8"
+                                stroke="currentColor"
+                                fill="transparent"
+                                r="40"
+                                cx="50"
+                                cy="50"
+                            />
+                            {/* Progress Circle */}
+                            <circle
+                                className={cn("transition-all duration-1000 ease-out", gaugeColor)}
+                                strokeWidth="8"
+                                strokeLinecap="round"
+                                stroke={gaugeStroke}
+                                fill="transparent"
+                                r="40"
+                                cx="50"
+                                cy="50"
+                                style={{
+                                    strokeDasharray: `${2 * Math.PI * 40}`,
+                                    strokeDashoffset: `${2 * Math.PI * 40 * (1 - Math.min(stats.variableBudgetPercent, 100) / 100)}`,
+                                }}
+                            />
+                        </svg>
+                        <div className="absolute flex flex-col items-center">
+                            <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                                {Math.round(stats.variableBudgetPercent)}%
+                            </span>
+                            <span className="text-xs text-slate-500 font-medium">CONSUMED</span>
+                        </div>
+                    </div>
+
+                    {/* Details */}
+                    <div className="space-y-4 text-center md:text-left min-w-[200px]">
+                        <div>
+                            <div className="text-sm text-slate-500 mb-1">Total Budget Goal</div>
+                            <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                                {formatCurrency(stats.variableBudgetLimit)}
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-sm text-slate-500 mb-1">Remaining</div>
+                            <div className="text-xl font-semibold text-brand-success">
+                                {formatCurrency(stats.variableBudgetLimit - stats.totalVariableExpenses)}
+                            </div>
+                        </div>
+                    </div>
+
+                </CardContent>
+            </Card>
+
             {/* Summary Cards */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="col-span-1 md:col-span-2 lg:col-span-7 order-3 md:order-2 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
                     title="Total Income"
                     amount={stats.totalIncome}
@@ -154,79 +222,10 @@ export default function DashboardPage() {
                 />
             </div>
 
-            {/* Main Content Grid */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-
-                {/* Global Variable Goal - Main Feature */}
-                <Card className="col-span-4 lg:col-span-4 border-brand-primary/20 bg-gradient-to-br from-white to-slate-50 dark:from-brand-surface dark:to-slate-900">
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <CardTitle>Global Variable Goal</CardTitle>
-                        </div>
-                        <CardDescription>
-                            Your spending limit for all extra expenses this month.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col md:flex-row items-center justify-center gap-8 py-8">
-
-                        {/* Circular Gauge */}
-                        <div className="relative h-48 w-48 flex items-center justify-center">
-                            <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
-                                {/* Background Circle */}
-                                <circle
-                                    className="text-slate-200 dark:text-slate-700"
-                                    strokeWidth="8"
-                                    stroke="currentColor"
-                                    fill="transparent"
-                                    r="40"
-                                    cx="50"
-                                    cy="50"
-                                />
-                                {/* Progress Circle */}
-                                <circle
-                                    className={cn("transition-all duration-1000 ease-out", gaugeColor)}
-                                    strokeWidth="8"
-                                    strokeLinecap="round"
-                                    stroke={gaugeStroke}
-                                    fill="transparent"
-                                    r="40"
-                                    cx="50"
-                                    cy="50"
-                                    style={{
-                                        strokeDasharray: `${2 * Math.PI * 40}`,
-                                        strokeDashoffset: `${2 * Math.PI * 40 * (1 - Math.min(stats.variableBudgetPercent, 100) / 100)}`,
-                                    }}
-                                />
-                            </svg>
-                            <div className="absolute flex flex-col items-center">
-                                <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                                    {Math.round(stats.variableBudgetPercent)}%
-                                </span>
-                                <span className="text-xs text-slate-500 font-medium">CONSUMED</span>
-                            </div>
-                        </div>
-
-                        {/* Details */}
-                        <div className="space-y-4 text-center md:text-left min-w-[200px]">
-                            <div>
-                                <div className="text-sm text-slate-500 mb-1">Total Budget Goal</div>
-                                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                                    {formatCurrency(stats.variableBudgetLimit)}
-                                </div>
-                            </div>
-                            <div>
-                                <div className="text-sm text-slate-500 mb-1">Remaining</div>
-                                <div className="text-xl font-semibold text-brand-success">
-                                    {formatCurrency(stats.variableBudgetLimit - stats.totalVariableExpenses)}
-                                </div>
-                            </div>
-                        </div>
-
-                    </CardContent>
-                </Card>
-
-                <VariableBreakdownCard breakdown={variableBreakdown} />
-            </div>
+            <VariableBreakdownCard
+                breakdown={variableBreakdown}
+                className="col-span-1 md:col-span-2 lg:col-span-3 order-4"
+            />
         </div>
     );
 }

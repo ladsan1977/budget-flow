@@ -16,13 +16,14 @@ import { resolveColor } from '../../lib/colors';
 interface VariableBreakdownCardProps {
     /** Pre-computed category breakdown produced by the parent's useMemo. */
     breakdown: CategoryBreakdown[];
+    className?: string;
 }
 
-export function VariableBreakdownCard({ breakdown }: VariableBreakdownCardProps) {
+export function VariableBreakdownCard({ breakdown, className }: VariableBreakdownCardProps) {
     const navigate = useNavigate();
 
     return (
-        <Card className="col-span-4 lg:col-span-3">
+        <Card className={className}>
             <CardHeader>
                 <CardTitle>Variable Breakdown</CardTitle>
                 <CardDescription>Where your money is going.</CardDescription>

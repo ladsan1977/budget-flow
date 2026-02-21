@@ -175,12 +175,13 @@ export default function FixedExpensesPage() {
 
                     <div className="flex items-center gap-2">
                         {/* Action Buttons */}
-                        <Button onClick={handleReplicateClick} className="shadow-lg shadow-brand-primary/20 gap-2 font-medium shrink-0  hidden sm:inline-flex">
+                        <Button onClick={handleReplicateClick} className="shadow-lg shadow-brand-primary/20 gap-2 font-medium shrink-0 hidden sm:inline-flex">
                             <Copy className="h-4 w-4" />
                             <span>Clone Last Month</span>
                         </Button>
-                        <Button onClick={handleReplicateClick} variant="outline" size="icon" className="shadow-lg shadow-brand-primary/20 sm:hidden shrink-0">
+                        <Button onClick={handleReplicateClick} variant="outline" size="sm" className="shadow-lg shadow-brand-primary/20 sm:hidden shrink-0 gap-2 h-10 px-3">
                             <Copy className="h-4 w-4" />
+                            <span className="text-sm font-medium">Clone</span>
                         </Button>
                         <Button onClick={() => setIsAddModalOpen(true)} variant="outline" className="gap-2 bg-white shrink-0 hidden sm:inline-flex">
                             <Plus className="h-4 w-4" />

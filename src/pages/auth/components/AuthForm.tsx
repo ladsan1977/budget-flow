@@ -68,7 +68,9 @@ export function AuthForm({ isLogin, onToggleMode }: AuthFormProps) {
                     }
                 })
                 if (error) throw error
-                toast.success("Account created successfully!")
+                toast.success("Account created successfully! Please log in.")
+                setFormData(prev => ({ ...prev, password: '' }))
+                onToggleMode()
             }
         } catch (error: any) {
             toast.error(error.message || "An error occurred during authentication.")
@@ -171,7 +173,7 @@ export function AuthForm({ isLogin, onToggleMode }: AuthFormProps) {
                     <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
                 </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-3">
+                <div className="mt-6 grid grid-cols-1 gap-3">
                     <Button variant="outline" type="button" className="h-11 border-slate-200 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-brand-surface/80" onClick={() => handleSocialAuth('google')}>
                         <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24">
                             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -181,7 +183,7 @@ export function AuthForm({ isLogin, onToggleMode }: AuthFormProps) {
                         </svg>
                         Google
                     </Button>
-                    <Button variant="outline" type="button" className="h-11 border-slate-200 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-brand-surface/80" onClick={() => handleSocialAuth('azure')}>
+                    <Button variant="outline" type="button" className="hidden h-11 border-slate-200 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-brand-surface/80" onClick={() => handleSocialAuth('azure')}>
                         <svg className="h-4 w-4 mr-2" viewBox="0 0 21 21">
                             <path d="M10 0H0v10h10V0z" fill="#f25022" />
                             <path d="M21 0H11v10h10V0z" fill="#7fba00" />
