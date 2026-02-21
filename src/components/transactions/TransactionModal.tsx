@@ -8,6 +8,9 @@ import { X, AlertCircle } from 'lucide-react';
 import type { Transaction, TransactionType } from '../../types';
 import { useDate } from '../../context/DateContext';
 import { useVariableBudgetLimit } from '../../hooks/useBudgets';
+import { MobileCategorySelector } from './MobileCategorySelector';
+import * as LucideIcons from 'lucide-react';
+import { resolveColor } from '../../lib/colors';
 
 export interface TransactionModalProps {
     isOpen: boolean;
@@ -32,6 +35,7 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
     const [type, setType] = useState<TransactionType>(initialType);
     const [categoryId, setCategoryId] = useState('');
     const [isPaid, setIsPaid] = useState(false);
+    const [isCategorySelectorOpen, setIsCategorySelectorOpen] = useState(false);
 
     // Initial Date Logic
     useEffect(() => {
@@ -99,10 +103,6 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
         }
     };
 
-    const incomeCategories = categories.filter(c => c.type === 'income');
-    const fixedCategories = categories.filter(c => c.type === 'fixed');
-    const variableCategories = categories.filter(c => c.type === 'variable');
-
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
@@ -169,61 +169,50 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 placeholder="e.g. Weekly Groceries"
-                                className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
+                                className="h-11 w-full rounded-xl border border-slate-200 px-4 text-base md:text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
                             />
                         </div>
 
                         {/* Category */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-500">Category</label>
-                            <select
-                                value={categoryId}
+                            <button
+                                type="button"
                                 disabled={categoriesLoading}
-                                onChange={(e) => {
-                                    const newCategoryId = e.target.value;
-                                    setCategoryId(newCategoryId);
-                                    if (!lockType) {
-                                        const category = categories.find(c => c.id === newCategoryId);
-                                        if (category) {
-                                            setType(category.type);
-                                        }
-                                    }
-                                }}
+                                onClick={() => setIsCategorySelectorOpen(true)}
                                 className={cn(
-                                    "h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100",
-                                    categoriesLoading && "opacity-60 cursor-not-allowed"
+                                    "flex h-11 w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 text-base md:text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100 transition-all",
+                                    categoriesLoading && "opacity-60 cursor-not-allowed",
+                                    !categoryId && "text-slate-500"
                                 )}
                             >
                                 {categoriesLoading ? (
-                                    <option>Loading categories…</option>
+                                    <span>Loading categories...</span>
+                                ) : categoryId ? (
+                                    (() => {
+                                        const selected = categories.find(c => c.id === categoryId);
+                                        if (!selected) return <span>Select Category</span>;
+                                        const IconComponent = (LucideIcons as any)[selected.icon || 'HelpCircle'] || LucideIcons.HelpCircle;
+                                        return (
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="flex h-7 w-7 items-center justify-center rounded-lg shadow-sm"
+                                                    style={{
+                                                        backgroundColor: resolveColor(selected.color),
+                                                        color: '#ffffff'
+                                                    }}
+                                                >
+                                                    <IconComponent className="h-4 w-4" />
+                                                </div>
+                                                <span className="font-medium text-slate-900 dark:text-white">{selected.name}</span>
+                                            </div>
+                                        );
+                                    })()
                                 ) : (
-                                    <option value="" disabled>Select Category</option>
+                                    <span>Select Category</span>
                                 )}
-
-                                {(!lockType || type === 'income') && incomeCategories.length > 0 && (
-                                    <optgroup label="Income">
-                                        {incomeCategories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                        ))}
-                                    </optgroup>
-                                )}
-
-                                {(!lockType || type === 'fixed') && fixedCategories.length > 0 && (
-                                    <optgroup label="Fixed Expenses">
-                                        {fixedCategories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                        ))}
-                                    </optgroup>
-                                )}
-
-                                {(!lockType || type === 'variable') && variableCategories.length > 0 && (
-                                    <optgroup label="Variable Expenses">
-                                        {variableCategories.map(cat => (
-                                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                                        ))}
-                                    </optgroup>
-                                )}
-                            </select>
+                                <LucideIcons.ChevronDown className="h-4 w-4 text-slate-400 opacity-50" />
+                            </button>
                         </div>
 
                         {/* Date */}
@@ -233,7 +222,7 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                                 type="date"
                                 value={date}
                                 onChange={(e) => setDate(e.target.value)}
-                                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
+                                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-base md:text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
                             />
                         </div>
 
@@ -272,6 +261,24 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                     </Button>
                 </div>
             </Card>
+
+            <MobileCategorySelector
+                isOpen={isCategorySelectorOpen}
+                onClose={() => setIsCategorySelectorOpen(false)}
+                categories={categories}
+                selectedId={categoryId}
+                type={type}
+                lockType={lockType}
+                onSelect={(newCategoryId) => {
+                    setCategoryId(newCategoryId);
+                    if (!lockType) {
+                        const category = categories.find(c => c.id === newCategoryId);
+                        if (category) {
+                            setType(category.type);
+                        }
+                    }
+                }}
+            />
         </div>
     );
 }

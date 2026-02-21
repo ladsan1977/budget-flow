@@ -10,6 +10,7 @@ import { useDate } from '../../context/DateContext';
 import { VARIABLE_CATEGORY_ID } from '../../lib/constants';
 import { formatCurrency, cn } from '../../lib/utils';
 import { Edit2, AlertCircle } from 'lucide-react';
+import { MonthSelector } from '../../components/common/MonthSelector';
 
 export default function VariableCostsPage() {
     const { currentDate } = useDate();
@@ -81,14 +82,19 @@ export default function VariableCostsPage() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 max-w-5xl mx-auto">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Variable Budget
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">
-                        Track your discretionary spending against a global monthly goal.
-                    </p>
+            <div className="sticky top-16 md:top-0 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 md:static md:m-0 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                            Variable Budget
+                        </h1>
+                        <p className="text-slate-500 dark:text-slate-400 mt-1 hidden md:block">
+                            Track your discretionary spending against a global monthly goal.
+                        </p>
+                    </div>
+                </div>
+                <div className="md:hidden flex justify-start w-full">
+                    <MonthSelector />
                 </div>
             </div>
 

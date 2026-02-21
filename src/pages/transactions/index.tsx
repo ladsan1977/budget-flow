@@ -12,6 +12,8 @@ import type { Transaction, TransactionType } from '../../types';
 import { TransactionModal } from '../../components/transactions/TransactionModal';
 import { ConfirmModal } from '../../components/common/ConfirmModal';
 import { useDeleteTransaction } from '../../hooks/useTransactionMutations';
+import { MobileDataCard } from '../../components/ui/MobileDataCard';
+import { MonthSelector } from '../../components/common/MonthSelector';
 
 export default function TransactionsPage() {
 
@@ -55,34 +57,39 @@ export default function TransactionsPage() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Transactions
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400">
-                        Manage your income and expenses.
-                    </p>
-                </div>
-                <div className="flex gap-2">
-                    <div className="relative">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
-                        <input
-                            type="search"
-                            placeholder="Search..."
-                            className="h-10 w-full md:w-[200px] rounded-lg border border-slate-200 bg-white px-9 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary dark:border-slate-800 dark:bg-brand-surface dark:text-slate-100"
-                        />
+            {/* Header & Controls */}
+            <div className="sticky top-16 md:top-0 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 md:static md:m-0 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                            Transactions
+                        </h1>
+                        <p className="text-slate-500 dark:text-slate-400 hidden md:block">
+                            Manage your income and expenses.
+                        </p>
                     </div>
-                    <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 shadow-lg shadow-brand-primary/20">
-                        <Plus className="h-4 w-4" />
-                        Add Transaction
-                    </Button>
+                    <div className="flex gap-2 w-full md:w-auto">
+                        <div className="relative flex-1 md:flex-none">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+                            <input
+                                type="search"
+                                placeholder="Search..."
+                                className="h-10 w-full md:w-[200px] rounded-lg border border-slate-200 bg-white px-9 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary dark:border-slate-800 dark:bg-brand-surface dark:text-slate-100"
+                            />
+                        </div>
+                        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 shadow-lg shadow-brand-primary/20 shrink-0 hidden sm:inline-flex">
+                            <Plus className="h-4 w-4" />
+                            <span>Add Transaction</span>
+                        </Button>
+                    </div>
+                </div>
+                <div className="md:hidden flex justify-start w-full">
+                    <MonthSelector />
                 </div>
             </div>
 
-            {/* Main Table Card */}
-            <Card className="overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex flex-col max-h-[600px]">
+            {/* Desktop Table Card */}
+            <Card className="hidden md:flex overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex-col max-h-[600px]">
                 <div className="overflow-y-auto flex-1">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-slate-50 text-slate-500 dark:bg-slate-900/50 dark:text-slate-400 sticky top-0 z-10">
@@ -96,7 +103,7 @@ export default function TransactionsPage() {
                                 <th className="px-6 py-4 font-medium text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-brand-surface">
                             {sortedTransactions.map((tx) => {
                                 const category = categories.find(c => c.id === tx.categoryId);
                                 return (
@@ -109,7 +116,6 @@ export default function TransactionsPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-                                                {/* Icon placeholder */}
                                                 <div className={cn("h-2 w-2 rounded-full", category?.color?.replace('text-', 'bg-') || 'bg-slate-400')} />
                                                 {category?.name || 'Uncategorized'}
                                             </div>
@@ -170,6 +176,67 @@ export default function TransactionsPage() {
                     </div>
                 )}
             </Card>
+
+            {/* Mobile Cards List */}
+            <div className="flex flex-col gap-3 md:hidden">
+                {sortedTransactions.map((tx) => {
+                    const category = categories.find(c => c.id === tx.categoryId);
+                    return (
+                        <MobileDataCard
+                            key={tx.id}
+                            icon={
+                                <div className={cn("h-3 w-3 rounded-full", category?.color?.replace('text-', 'bg-') || 'bg-slate-400')} />
+                            }
+                            categoryName={category?.name || 'Uncategorized'}
+                            date={tx.date}
+                            description={tx.description}
+                            amount={tx.amount}
+                            isIncome={tx.type === 'income'}
+                            statusNode={
+                                <div className="flex gap-2 items-center">
+                                    <Badge variant={getBadgeVariant(tx.type)} className="text-[10px] px-1.5 py-0">
+                                        {tx.type}
+                                    </Badge>
+                                    {tx.isPaid ? (
+                                        <div className="flex items-center gap-1 text-xs font-medium text-brand-success">
+                                            <CheckCircle2 className="h-3 w-3" /> Paid
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-1 text-xs font-medium text-slate-500">
+                                            <Clock className="h-3 w-3" /> Pending
+                                        </div>
+                                    )}
+                                </div>
+                            }
+                            actions={
+                                <>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-8 w-8 p-0 text-slate-400 hover:text-brand-primary"
+                                        onClick={() => setEditingTransaction(tx)}
+                                    >
+                                        <Edit2 className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-500"
+                                        onClick={() => setTransactionToDelete(tx.id)}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </>
+                            }
+                        />
+                    );
+                })}
+                {sortedTransactions.length === 0 && (
+                    <div className="p-8 text-center text-slate-500">
+                        No transactions found.
+                    </div>
+                )}
+            </div>
 
             {/* Add/Edit Transaction Modal */}
             <TransactionModal

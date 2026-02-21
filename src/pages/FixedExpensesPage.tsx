@@ -16,6 +16,8 @@ import { InfoModal } from '../components/common/InfoModal';
 import { ConfirmModal } from '../components/common/ConfirmModal';
 import { shiftDateToTargetMonth } from '../lib/utils';
 import { fetchTransactionsByMonth } from '../services/supabaseData';
+import { MobileDataCard } from '../components/ui/MobileDataCard';
+import { MonthSelector } from '../components/common/MonthSelector';
 
 export default function FixedExpensesPage() {
     const { currentDate, monthName, year } = useDate();
@@ -160,28 +162,34 @@ export default function FixedExpensesPage() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Header & Controls */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Fixed Expenses
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400">
-                        Manage your monthly recurring obligations.
-                    </p>
+            <div className="sticky top-16 md:top-0 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 md:static md:m-0 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none flex flex-col gap-4">
+                <div className="flex flex-row items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                            Fixed Expenses
+                        </h1>
+                        <p className="text-slate-500 dark:text-slate-400 hidden md:block">
+                            Manage your monthly recurring obligations.
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        {/* Action Buttons */}
+                        <Button onClick={handleReplicateClick} className="shadow-lg shadow-brand-primary/20 gap-2 font-medium shrink-0  hidden sm:inline-flex">
+                            <Copy className="h-4 w-4" />
+                            <span>Clone Last Month</span>
+                        </Button>
+                        <Button onClick={handleReplicateClick} variant="outline" size="icon" className="shadow-lg shadow-brand-primary/20 sm:hidden shrink-0">
+                            <Copy className="h-4 w-4" />
+                        </Button>
+                        <Button onClick={() => setIsAddModalOpen(true)} variant="outline" className="gap-2 bg-white shrink-0 hidden sm:inline-flex">
+                            <Plus className="h-4 w-4" />
+                            <span>New Expense</span>
+                        </Button>
+                    </div>
                 </div>
-
-                <div className="flex items-center gap-3">
-                    {/* Month Selector Removed (Moved to Header) */}
-
-                    {/* Action Buttons */}
-                    <Button onClick={handleReplicateClick} className="shadow-lg shadow-brand-primary/20 gap-2 font-medium">
-                        <Copy className="h-4 w-4" />
-                        Clone Last Month
-                    </Button>
-                    <Button onClick={() => setIsAddModalOpen(true)} variant="outline" className="gap-2 bg-white">
-                        <Plus className="h-4 w-4" />
-                        New Expense
-                    </Button>
+                <div className="md:hidden flex justify-start w-full">
+                    <MonthSelector />
                 </div>
             </div>
 
@@ -230,8 +238,8 @@ export default function FixedExpensesPage() {
                 </Card>
             </div>
 
-            {/* Expenses Table */}
-            <Card className="overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex flex-col max-h-[500px]">
+            {/* Desktop Expenses Table */}
+            <Card className="hidden md:flex overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex-col max-h-[500px]">
                 <div className="overflow-y-auto flex-1">
                     <table className="w-full text-sm text-left">
                         <thead className="bg-white border-b border-slate-100 text-slate-500 dark:bg-brand-surface dark:border-slate-800 dark:text-slate-400 sticky top-0 z-10">
@@ -313,6 +321,65 @@ export default function FixedExpensesPage() {
                     </table>
                 </div>
             </Card>
+
+            {/* Mobile Cards List */}
+            <div className="flex flex-col md:hidden">
+                <div className="flex items-center justify-between pb-3 mb-4 mt-2 px-1 border-b border-slate-200 dark:border-slate-800">
+                    <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                        Expenses List
+                    </h2>
+                    <span className="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+                        {currentMonthFixedExpenses.length} items
+                    </span>
+                </div>
+                <div className="flex flex-col gap-3">
+                    {currentMonthFixedExpenses.length === 0 ? (
+                        <div className="p-8 text-center text-slate-500 bg-white dark:bg-brand-surface rounded-xl border border-slate-200 dark:border-slate-800">
+                            No fixed expenses found for {monthName} {year}. <br />
+                            Try replicating from last month or add a new transaction.
+                        </div>
+                    ) : (
+                        currentMonthFixedExpenses.map((tx) => {
+                            const category = categories.find(c => c.id === tx.categoryId);
+                            return (
+                                <MobileDataCard
+                                    key={tx.id}
+                                    icon={<Calendar className="h-3 w-3" />}
+                                    categoryName={category?.name || 'Uncategorized'}
+                                    date={`${new Date(tx.date).getDate()}th`}
+                                    description={tx.description}
+                                    amount={tx.amount}
+                                    isIncome={false}
+                                    statusNode={
+                                        <button
+                                            onClick={() => togglePaidStatus(tx.id, tx.isPaid)}
+                                            className={cn(
+                                                "inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-bold transition-all min-w-[60px]",
+                                                tx.isPaid
+                                                    ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                                    : "bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400"
+                                            )}
+                                        >
+                                            {tx.isPaid ? 'Paid' : 'Pending'}
+                                        </button>
+                                    }
+                                    actions={
+                                        <>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 w-8 p-0 text-slate-400 hover:text-brand-primary"
+                                                onClick={() => setEditingTransaction(tx)}
+                                            >
+                                            </Button>
+                                        </>
+                                    }
+                                />
+                            );
+                        })
+                    )}
+                </div>
+            </div>
 
             {/* Replication Modal */}
             {isReplicateModalOpen && (

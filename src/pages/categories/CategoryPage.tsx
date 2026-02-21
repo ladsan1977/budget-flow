@@ -11,6 +11,8 @@ import { ConfirmModal } from '../../components/common/ConfirmModal';
 import type { Category } from '../../types';
 import { resolveColor } from '../../lib/colors';
 import { Badge } from '../../components/ui/Badge';
+import { MobileDataCard } from '../../components/ui/MobileDataCard';
+import { MonthSelector } from '../../components/common/MonthSelector';
 
 export default function CategoryPage() {
     const { data: categories = [], isLoading, error, refetch } = useCategories();
@@ -87,97 +89,161 @@ export default function CategoryPage() {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Categories
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400">
-                        Manage your incoming and outgoing categories.
-                    </p>
+            <div className="sticky top-16 md:top-0 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 md:static md:m-0 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                            Categories
+                        </h1>
+                        <p className="text-slate-500 dark:text-slate-400 hidden md:block">
+                            Manage your incoming and outgoing categories.
+                        </p>
+                    </div>
+                    <div className="flex gap-2 w-full md:w-auto">
+                        <Button onClick={handleOpenCreate} className="gap-2 shadow-lg shadow-brand-primary/20 shrink-0 hidden sm:inline-flex">
+                            <Plus className="h-4 w-4" />
+                            <span>Add Category</span>
+                        </Button>
+                    </div>
                 </div>
-                <div className="flex gap-2">
-                    <Button onClick={handleOpenCreate} className="gap-2 shadow-lg shadow-brand-primary/20">
-                        <Plus className="h-4 w-4" />
-                        Add Category
-                    </Button>
+                <div className="md:hidden flex justify-start w-full">
+                    <MonthSelector />
                 </div>
             </div>
 
             {isLoading ? (
                 <div className="text-slate-500">Loading categories...</div>
             ) : (
-                <Card className="overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex flex-col max-h-[600px]">
-                    <div className="overflow-y-auto flex-1">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-white border-b border-slate-100 text-slate-500 dark:bg-brand-surface dark:border-slate-800 dark:text-slate-400 sticky top-0 z-10">
-                                <tr>
-                                    <th className="px-6 py-4 font-medium">Category Name</th>
-                                    <th className="px-6 py-4 font-medium">Type</th>
-                                    <th className="px-6 py-4 font-medium text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-brand-surface">
-                                {sortedCategories.length === 0 ? (
+                <>
+                    {/* Desktop Categories Table */}
+                    <Card className="hidden md:flex overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex-col max-h-[600px]">
+                        <div className="overflow-y-auto flex-1">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-white border-b border-slate-100 text-slate-500 dark:bg-brand-surface dark:border-slate-800 dark:text-slate-400 sticky top-0 z-10">
                                     <tr>
-                                        <td colSpan={3} className="px-6 py-12 text-center text-slate-500">
-                                            No categories found. Try adding a new one.
-                                        </td>
+                                        <th className="px-6 py-4 font-medium">Category Name</th>
+                                        <th className="px-6 py-4 font-medium">Type</th>
+                                        <th className="px-6 py-4 font-medium text-right">Actions</th>
                                     </tr>
-                                ) : (
-                                    sortedCategories.map((category) => {
-                                        const IconComponent = category.icon && (LucideIcons as unknown as Record<string, React.ElementType>)[category.icon]
-                                            ? (LucideIcons as unknown as Record<string, React.ElementType>)[category.icon]
-                                            : LucideIcons.Folder;
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-brand-surface">
+                                    {sortedCategories.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={3} className="px-6 py-12 text-center text-slate-500">
+                                                No categories found. Try adding a new one.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        sortedCategories.map((category) => {
+                                            const IconComponent = category.icon && (LucideIcons as unknown as Record<string, React.ElementType>)[category.icon]
+                                                ? (LucideIcons as unknown as Record<string, React.ElementType>)[category.icon]
+                                                : LucideIcons.Folder;
 
-                                        return (
-                                            <tr key={category.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-3">
-                                                        <div
-                                                            className="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-sm"
-                                                            style={{ backgroundColor: resolveColor(category.color) }}
-                                                        >
-                                                            <IconComponent className="h-5 w-5" />
+                                            return (
+                                                <tr key={category.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                                    <td className="px-6 py-4">
+                                                        <div className="flex items-center gap-3">
+                                                            <div
+                                                                className="w-10 h-10 rounded-full flex items-center justify-center text-white shadow-sm"
+                                                                style={{ backgroundColor: resolveColor(category.color) }}
+                                                            >
+                                                                <IconComponent className="h-5 w-5" />
+                                                            </div>
+                                                            <div className="font-semibold text-slate-900 dark:text-slate-100">
+                                                                {category.name}
+                                                            </div>
                                                         </div>
-                                                        <div className="font-semibold text-slate-900 dark:text-slate-100">
-                                                            {category.name}
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <Badge variant={getBadgeVariant(category.type)} className="text-[10px] px-2 py-0.5 uppercase">
+                                                            {category.type}
+                                                        </Badge>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex justify-end gap-2">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0 text-slate-400 hover:text-brand-primary"
+                                                                onClick={() => handleOpenEdit(category)}
+                                                            >
+                                                                <Edit2 className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0 text-slate-400 hover:text-red-500"
+                                                                onClick={() => handleDelete(category.id)}
+                                                            >
+                                                                <X className="h-4 w-4" />
+                                                            </Button>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <Badge variant={getBadgeVariant(category.type)} className="text-[10px] px-2 py-0.5 uppercase">
-                                                        {category.type}
-                                                    </Badge>
-                                                </td>
-                                                <td className="px-6 py-4 text-right">
-                                                    <div className="flex justify-end gap-2">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-8 w-8 p-0 text-slate-400 hover:text-brand-primary"
-                                                            onClick={() => handleOpenEdit(category)}
-                                                        >
-                                                            <Edit2 className="h-4 w-4" />
-                                                        </Button>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-8 w-8 p-0 text-slate-400 hover:text-red-500"
-                                                            onClick={() => handleDelete(category.id)}
-                                                        >
-                                                            <X className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })
-                                )}
-                            </tbody>
-                        </table>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </Card>
+
+                    {/* Mobile Cards List */}
+                    <div className="flex flex-col gap-3 md:hidden">
+                        {sortedCategories.length === 0 ? (
+                            <div className="p-8 text-center text-slate-500 bg-white dark:bg-brand-surface rounded-xl border border-slate-200 dark:border-slate-800">
+                                No categories found. Try adding a new one.
+                            </div>
+                        ) : (
+                            sortedCategories.map((category) => {
+                                const IconComponent = category.icon && (LucideIcons as unknown as Record<string, React.ElementType>)[category.icon]
+                                    ? (LucideIcons as unknown as Record<string, React.ElementType>)[category.icon]
+                                    : LucideIcons.Folder;
+
+                                return (
+                                    <MobileDataCard
+                                        key={category.id}
+                                        icon={
+                                            <div
+                                                className="w-8 h-8 rounded-full flex items-center justify-center text-white shadow-sm"
+                                                style={{ backgroundColor: resolveColor(category.color) }}
+                                            >
+                                                <IconComponent className="h-4 w-4" />
+                                            </div>
+                                        }
+                                        categoryName="Category"
+                                        description={category.name}
+                                        statusNode={
+                                            <Badge variant={getBadgeVariant(category.type)} className="text-[10px] px-2 py-0.5 uppercase">
+                                                {category.type}
+                                            </Badge>
+                                        }
+                                        actions={
+                                            <>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-slate-400 hover:text-brand-primary"
+                                                    onClick={() => handleOpenEdit(category)}
+                                                >
+                                                    <Edit2 className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-slate-400 hover:text-red-500"
+                                                    onClick={() => handleDelete(category.id)}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </>
+                                        }
+                                    />
+                                );
+                            })
+                        )}
                     </div>
-                </Card>
+                </>
             )}
 
             {/* Modal */}

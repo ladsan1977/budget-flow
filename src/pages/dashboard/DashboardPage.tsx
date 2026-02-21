@@ -14,6 +14,7 @@ import { useMemo } from 'react';
 import type { CategoryBreakdown } from '../../types';
 import { VariableBreakdownCard } from './VariableBreakdownCard';
 import { StatCard } from '../../components/dashboard/StatCard';
+import { MonthSelector } from '../../components/common/MonthSelector';
 
 export default function DashboardPage() {
     const navigate = useNavigate();
@@ -92,18 +93,28 @@ export default function DashboardPage() {
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Dashboard
-                    </h1>
-                    <p className="text-slate-500 dark:text-slate-400">
-                        Overview for {monthName} {year}
-                    </p>
+            <div className="sticky top-16 md:top-0 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 md:static md:m-0 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none flex flex-col gap-4">
+                <div className="flex flex-row items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                            Dashboard
+                        </h1>
+                        <p className="text-slate-500 dark:text-slate-400 hidden md:block">
+                            Overview for {monthName} {year}
+                        </p>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button variant="outline" className="shrink-0">
+                            <span className="hidden sm:inline">Download Report</span>
+                            <span className="sm:hidden">Report</span>
+                        </Button>
+                        <Button onClick={() => navigate({ to: '/transactions' })} className="shrink-0 hidden sm:inline-flex">
+                            Add Transaction
+                        </Button>
+                    </div>
                 </div>
-                <div className="flex gap-2">
-                    <Button variant="outline">Download Report</Button>
-                    <Button onClick={() => navigate({ to: '/transactions' })}>Add Transaction</Button>
+                <div className="md:hidden flex justify-start w-full">
+                    <MonthSelector />
                 </div>
             </div>
 

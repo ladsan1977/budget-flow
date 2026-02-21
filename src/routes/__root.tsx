@@ -3,6 +3,8 @@ import { Shell } from '../components/layout/Shell'
 import { ThemeProvider } from '../components/theme-provider'
 import { DateProvider } from '../context/DateContext'
 import { AuthProvider, useAuth } from '../context/AuthContext'
+import { TransactionModalProvider, useTransactionModal } from '../context/TransactionModalContext'
+import { TransactionModal } from '../components/transactions/TransactionModal'
 import { ErrorBoundary } from '../components/ui/ErrorBoundary'
 import { Toaster } from 'sonner'
 import { useEffect } from 'react'
@@ -17,8 +19,11 @@ function RootComponent() {
             <ThemeProvider defaultTheme="dark" storageKey="budget-buddy-theme">
                 <AuthProvider>
                     <DateProvider>
-                        <AuthGuard />
-                        <Toaster position="top-right" richColors />
+                        <TransactionModalProvider>
+                            <AuthGuard />
+                            <GlobalTransactionModal />
+                            <Toaster position="top-right" richColors />
+                        </TransactionModalProvider>
                     </DateProvider>
                 </AuthProvider>
             </ThemeProvider>
@@ -41,4 +46,18 @@ function AuthGuard() {
     }, [isLoading, user, location.pathname, router])
 
     return <Shell />
+}
+
+function GlobalTransactionModal() {
+    const { isOpen, initialType, lockType, initialData, closeModal } = useTransactionModal();
+
+    return (
+        <TransactionModal
+            isOpen={isOpen}
+            onClose={closeModal}
+            initialType={initialType}
+            lockType={lockType}
+            initialData={initialData}
+        />
+    );
 }
