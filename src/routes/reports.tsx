@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { ComingSoon } from '../components/common/ComingSoon'
 
 export const Route = createFileRoute('/reports')(({
   component: Reports,
@@ -6,13 +7,12 @@ export const Route = createFileRoute('/reports')(({
 
 function Reports() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-6">
-        Reports
-      </h1>
-      <p className="text-slate-600 dark:text-slate-400">
-        View financial reports and analytics.
-      </p>
+    <div className="flex-1 py-12">
+      <ComingSoon
+        title="Reports Coming Soon"
+        description="We are currently building comprehensive financial reports and analytics to help you manage your budget better. Stay tuned!"
+        icon="sparkles"
+      />
     </div>
   )
 }

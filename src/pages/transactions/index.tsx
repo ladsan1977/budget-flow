@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -23,6 +23,22 @@ export default function TransactionsPage() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [transactionToDelete, setTransactionToDelete] = useState<string | null>(null);
+
+    const sortedTransactions = useMemo(() => {
+        return [...transactions].sort((a, b) => {
+            // Priority 1: Type (income -> fixed expenses -> variable expenses)
+            const typeOrder: Record<TransactionType, number> = { income: 0, fixed: 1, variable: 2 };
+            const typeDiff = typeOrder[a.type] - typeOrder[b.type];
+            if (typeDiff !== 0) {
+                return typeDiff;
+            }
+
+            // Priority 2: Date ascending
+            const dateA = new Date(a.date).getTime();
+            const dateB = new Date(b.date).getTime();
+            return dateA - dateB;
+        });
+    }, [transactions]);
 
     if (error) {
         return <QueryErrorFallback error={error} resetErrorBoundary={refetch} title="Failed to load transactions" />;
@@ -81,7 +97,7 @@ export default function TransactionsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                            {transactions.map((tx) => {
+                            {sortedTransactions.map((tx) => {
                                 const category = categories.find(c => c.id === tx.categoryId);
                                 return (
                                     <tr key={tx.id} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
@@ -148,7 +164,7 @@ export default function TransactionsPage() {
                         </tbody>
                     </table>
                 </div>
-                {transactions.length === 0 && (
+                {sortedTransactions.length === 0 && (
                     <div className="p-8 text-center text-slate-500">
                         No transactions found.
                     </div>

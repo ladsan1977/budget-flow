@@ -183,6 +183,38 @@ export const setMonthlyVariableBudget = async (date: Date, amount: number): Prom
     const year = date.getFullYear();
     const dateStr = `${year}-${String(month).padStart(2, '0')}-01`;
 
+    // Ensure the required proxy category exists for this user before setting budget
+    // This resolves foreign key violation where the proxy category hasn't been created yet for new users
+    const { data: categoryData, error: categoryCheckError } = await supabase
+        .from('categories')
+        .select('id')
+        .eq('id', VARIABLE_CATEGORY_ID)
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (categoryCheckError) {
+        throw new Error(`Failed to check budget category: ${categoryCheckError.message}`);
+    }
+
+    if (!categoryData) {
+        const categoryPayload: CategoryInsert = {
+            id: VARIABLE_CATEGORY_ID,
+            name: 'Variable Expenses',
+            type: 'variable',
+            icon: 'ShoppingCart',
+            color: 'text-blue-500',
+            user_id: userId,
+        };
+
+        const { error: categoryError } = await supabase
+            .from('categories')
+            .insert(categoryPayload);
+
+        if (categoryError && categoryError.code !== '23505') { // Ignore unique violation if racing
+            throw new Error(`Failed to create default variable category: ${categoryError.message}`);
+        }
+    }
+
     const payload: BudgetInsert = {
         user_id: userId,
         category_id: VARIABLE_CATEGORY_ID,
