@@ -107,15 +107,15 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
             <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
-            <Card className="relative w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in fade-in zoom-in-95 duration-200">
-                <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 p-6 dark:border-slate-800">
-                    <CardTitle>{initialData ? 'Edit Transaction' : 'Add Transaction'}</CardTitle>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="-mr-2">
+            <Card className="relative w-full max-w-lg max-h-[90dvh] flex flex-col transform overflow-hidden rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in fade-in zoom-in-95 duration-200">
+                <CardHeader className="shrink-0 flex flex-row items-center justify-between border-b border-slate-100 p-4 sm:p-6 dark:border-slate-800">
+                    <CardTitle className="text-lg md:text-xl break-words whitespace-normal leading-tight">{initialData ? 'Edit Transaction' : 'Add Transaction'}</CardTitle>
+                    <Button variant="ghost" size="icon" onClick={onClose} className="-mr-2 shrink-0">
                         <X className="h-4 w-4" />
                     </Button>
                 </CardHeader>
 
-                <div className="p-6 space-y-6">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
                     {/* Amount Input */}
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-500">Amount</label>
@@ -252,7 +252,7 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                     )}
                 </div>
 
-                <div className="flex justify-end gap-3 border-t border-slate-100 p-6 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/20">
+                <div className="shrink-0 mt-auto flex justify-end gap-3 border-t border-slate-100 pt-4 pb-4 px-4 sm:pb-6 sm:px-6 dark:border-slate-800 bg-background dark:bg-brand-surface">
                     <Button variant="ghost" onClick={onClose}>
                         Cancel
                     </Button>
