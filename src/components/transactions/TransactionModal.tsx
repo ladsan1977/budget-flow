@@ -104,10 +104,10 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-start pt-12 pb-24 sm:pb-0 sm:pt-0 sm:items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-50 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
             <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
-            <Card className="relative w-full max-w-lg mb-16 sm:mb-0 max-h-[min(calc(100vh-8rem),700px)] sm:max-h-none flex flex-col transform overflow-hidden sm:overflow-visible rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in fade-in zoom-in-95 duration-200">
+            <Card className="fixed top-10 bottom-24 left-4 right-4 sm:relative sm:top-auto sm:bottom-auto sm:left-auto sm:right-auto sm:w-full sm:max-w-lg sm:h-auto flex flex-col transform overflow-hidden sm:overflow-visible rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in zoom-in-95 duration-200">
                 <CardHeader className="shrink-0 flex flex-row items-center justify-between border-b border-slate-100 p-4 sm:p-6 dark:border-slate-800">
                     <CardTitle className="text-lg md:text-xl font-bold leading-tight text-slate-900 dark:text-slate-100 flex-none">
                         {initialData ? 'Edit' : 'Add'} Transaction
@@ -141,7 +141,7 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                 </CardHeader>
 
                 <div className="flex flex-col sm:overflow-visible overflow-y-auto w-full md:h-auto min-h-0">
-                    <div className="p-4 sm:p-6 pb-8 sm:pb-6 space-y-6 flex-1">
+                    <div className="p-4 sm:p-6 pb-12 sm:pb-6 space-y-6 flex-1">
                         {/* Amount Input */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-500">Amount</label>
