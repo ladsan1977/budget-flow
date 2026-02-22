@@ -11,6 +11,7 @@ import { useVariableBudgetLimit } from '../../hooks/useBudgets';
 import { MobileCategorySelector } from './MobileCategorySelector';
 import * as LucideIcons from 'lucide-react';
 import { resolveColor } from '../../lib/colors';
+import { toast } from 'sonner';
 
 export interface TransactionModalProps {
     isOpen: boolean;
@@ -69,7 +70,18 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
     if (!isOpen) return null;
 
     const handleSave = () => {
-        if (!description || !amount || !categoryId) return;
+        if (!amount) {
+            toast.error('Please enter an amount');
+            return;
+        }
+        if (!description) {
+            toast.error('Please enter a description');
+            return;
+        }
+        if (!categoryId) {
+            toast.error('Please select a category');
+            return;
+        }
 
         if (initialData) {
             updateMutation.mutate({
