@@ -114,20 +114,28 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                     </CardTitle>
 
                     <div className="flex items-center gap-2">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={onClose}
-                            className="h-8 w-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
-                        >
+                        {/* Mobile Header Buttons */}
+                        <div className="flex sm:hidden items-center gap-2">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onClose}
+                                className="h-8 w-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                size="icon"
+                                onClick={handleSave}
+                                className="h-8 w-8 rounded-full bg-brand-primary text-white hover:bg-brand-primary/90 shadow-sm"
+                            >
+                                <Check className="h-4 w-4" />
+                            </Button>
+                        </div>
+
+                        {/* Desktop Header Close Button */}
+                        <Button variant="ghost" size="icon" onClick={onClose} className="hidden sm:inline-flex -mr-2 shrink-0">
                             <X className="h-4 w-4" />
-                        </Button>
-                        <Button
-                            size="icon"
-                            onClick={handleSave}
-                            className="h-8 w-8 rounded-full bg-brand-primary text-white hover:bg-brand-primary/90 shadow-sm"
-                        >
-                            <Check className="h-4 w-4" />
                         </Button>
                     </div>
                 </CardHeader>
