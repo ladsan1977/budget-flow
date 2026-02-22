@@ -1,4 +1,4 @@
-import { Outlet, useLocation } from '@tanstack/react-router'
+import { Outlet, useLocation, useElementScrollRestoration } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
@@ -6,6 +6,7 @@ import { BottomNav } from './BottomNav'
 
 export function Shell() {
     const location = useLocation()
+    useElementScrollRestoration({ id: 'main-scroll-container' })
 
     // Hide standard layout wrapper on auth pages
     if (location.pathname === '/login') {
@@ -18,7 +19,7 @@ export function Shell() {
             <Sidebar className="hidden md:flex" />
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col overflow-y-auto w-full relative pb-24 md:pb-0">
+            <main id="main-scroll-container" data-scroll-restoration-id="main-scroll-container" className="flex-1 flex flex-col overflow-y-auto scroll-smooth w-full relative pb-24 md:pb-0">
                 <Header />
 
                 {/* Page Content */}
