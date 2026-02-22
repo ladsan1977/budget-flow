@@ -4,7 +4,7 @@ import { Button } from '../ui/Button';
 import { useCategories } from '../../hooks/useCategories';
 import { useCreateTransaction, useUpdateTransaction } from '../../hooks/useTransactionMutations';
 import { formatCurrency, cn } from '../../lib/utils';
-import { X, AlertCircle } from 'lucide-react';
+import { X, AlertCircle, Check } from 'lucide-react';
 import type { Transaction, TransactionType } from '../../types';
 import { useDate } from '../../context/DateContext';
 import { useVariableBudgetLimit } from '../../hooks/useBudgets';
@@ -109,32 +109,26 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
 
             <Card className="relative w-full max-w-lg mb-16 sm:mb-0 max-h-[min(calc(100vh-8rem),700px)] sm:max-h-none flex flex-col transform overflow-hidden sm:overflow-visible rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in fade-in zoom-in-95 duration-200">
                 <CardHeader className="shrink-0 flex flex-row items-center justify-between border-b border-slate-100 p-4 sm:p-6 dark:border-slate-800">
-                    {/* Mobile Cancel Button (Left) */}
-                    <div className="sm:hidden flex-1">
-                        <button type="button" onClick={onClose} className="text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400">
-                            Cancel
-                        </button>
-                    </div>
-
-                    {/* Title */}
-                    <CardTitle className="text-lg md:text-xl break-words whitespace-normal leading-tight text-center sm:text-left flex-none sm:flex-1">
-                        {initialData ? 'Edit' : 'Add'} <span className="hidden sm:inline">Transaction</span>
+                    <CardTitle className="text-lg md:text-xl font-bold leading-tight text-slate-900 dark:text-slate-100 flex-none">
+                        {initialData ? 'Edit' : 'Add'} Transaction
                     </CardTitle>
 
-                    {/* Desktop Close Button (Right) */}
-                    <Button variant="ghost" size="icon" onClick={onClose} className="hidden sm:inline-flex -mr-2 shrink-0">
-                        <X className="h-4 w-4" />
-                    </Button>
-
-                    {/* Mobile Save Button (Right) */}
-                    <div className="sm:hidden flex-1 flex justify-end">
-                        <button
-                            type="button"
-                            onClick={handleSave}
-                            className="text-sm font-bold text-brand-primary hover:text-brand-primary/80 transition-colors"
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onClose}
+                            className="h-8 w-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
                         >
-                            Save
-                        </button>
+                            <X className="h-4 w-4" />
+                        </Button>
+                        <Button
+                            size="icon"
+                            onClick={handleSave}
+                            className="h-8 w-8 rounded-full bg-brand-primary text-white hover:bg-brand-primary/90 shadow-sm"
+                        >
+                            <Check className="h-4 w-4" />
+                        </Button>
                     </div>
                 </CardHeader>
 

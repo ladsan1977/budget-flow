@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { QueryErrorFallback } from '../../components/ui/QueryErrorFallback';
-import { Plus, X, Edit2 } from 'lucide-react';
+import { Plus, X, Edit2, Check } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { useCategories } from '../../hooks/useCategories';
 import { useCreateCategory, useUpdateCategory, useDeleteCategory } from '../../hooks/useCategoryMutations';
@@ -90,7 +90,7 @@ export default function CategoryPage() {
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header */}
             <div className="sticky top-16 md:top-0 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 md:static md:m-0 md:p-0 md:bg-transparent md:backdrop-blur-none md:border-none flex flex-col gap-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex flex-row items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                             Categories
@@ -99,10 +99,14 @@ export default function CategoryPage() {
                             Manage your incoming and outgoing categories.
                         </p>
                     </div>
-                    <div className="flex gap-2 w-full md:w-auto">
+                    <div className="flex items-center gap-2">
                         <Button onClick={handleOpenCreate} className="gap-2 shadow-lg shadow-brand-primary/20 shrink-0 hidden sm:inline-flex">
                             <Plus className="h-4 w-4" />
                             <span>Add Category</span>
+                        </Button>
+                        <Button onClick={handleOpenCreate} variant="outline" size="sm" className="shadow-lg shadow-brand-primary/20 sm:hidden shrink-0 gap-2 h-10 px-3">
+                            <Plus className="h-4 w-4" />
+                            <span className="text-sm font-medium">Add</span>
                         </Button>
                     </div>
                 </div>
@@ -248,22 +252,45 @@ export default function CategoryPage() {
 
             {/* Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+                <div className="fixed inset-0 z-50 flex items-start pt-12 pb-24 sm:pb-0 sm:pt-0 sm:items-center justify-center p-4 sm:p-6">
                     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={() => setIsModalOpen(false)} />
-                    <Card className="relative w-full max-w-lg transform overflow-hidden rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in fade-in zoom-in-95 duration-200">
-                        <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 p-6 dark:border-slate-800">
-                            <CardTitle>{editingCategory ? 'Edit Category' : 'Add Category'}</CardTitle>
-                            <Button variant="ghost" size="icon" onClick={() => setIsModalOpen(false)} className="-mr-2">
-                                <X className="h-4 w-4" />
-                            </Button>
+                    <Card className="relative w-full max-w-lg mb-16 sm:mb-0 max-h-[min(calc(100vh-8rem),700px)] sm:max-h-none flex flex-col transform overflow-hidden sm:overflow-visible rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in fade-in zoom-in-95 duration-200">
+                        <CardHeader className="shrink-0 flex flex-row items-center justify-between border-b border-slate-100 p-4 sm:p-6 dark:border-slate-800">
+                            <CardTitle className="text-lg md:text-xl font-bold leading-tight text-slate-900 dark:text-slate-100 flex-none">
+                                {editingCategory ? 'Edit Category' : 'Add Category'}
+                            </CardTitle>
+
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="h-8 w-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    size="icon"
+                                    onClick={() => {
+                                        const form = document.getElementById('category-form') as HTMLFormElement;
+                                        if (form) form.requestSubmit();
+                                    }}
+                                    className="h-8 w-8 rounded-full bg-brand-primary text-white hover:bg-brand-primary/90 shadow-sm"
+                                >
+                                    <Check className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </CardHeader>
-                        <div className="p-6">
-                            <CategoryForm
-                                initialData={editingCategory || undefined}
-                                onSubmit={handleSubmit}
-                                onCancel={() => setIsModalOpen(false)}
-                                isLoading={createMutation.isPending || updateMutation.isPending}
-                            />
+                        <div className="flex flex-col sm:overflow-visible overflow-y-auto w-full md:h-auto min-h-0">
+                            <div className="p-4 sm:p-6 pb-8 sm:pb-6 space-y-6 flex-1">
+                                <CategoryForm
+                                    id="category-form"
+                                    initialData={editingCategory || undefined}
+                                    onSubmit={handleSubmit}
+                                    onCancel={() => setIsModalOpen(false)}
+                                    isLoading={createMutation.isPending || updateMutation.isPending}
+                                />
+                            </div>
                         </div>
                     </Card>
                 </div>

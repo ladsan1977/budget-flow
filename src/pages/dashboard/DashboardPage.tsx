@@ -104,7 +104,7 @@ export default function DashboardPage() {
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        <Button variant="outline" className="shrink-0">
+                        <Button onClick={() => navigate({ to: '/reports' })} variant="outline" className="shrink-0">
                             <span className="hidden sm:inline">Download Report</span>
                             <span className="sm:hidden">Report</span>
                         </Button>
