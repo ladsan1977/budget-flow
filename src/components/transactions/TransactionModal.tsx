@@ -109,10 +109,33 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
 
             <Card className="relative w-full max-w-lg mb-16 sm:mb-0 max-h-[min(calc(100vh-8rem),700px)] sm:max-h-none flex flex-col transform overflow-hidden sm:overflow-visible rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in fade-in zoom-in-95 duration-200">
                 <CardHeader className="shrink-0 flex flex-row items-center justify-between border-b border-slate-100 p-4 sm:p-6 dark:border-slate-800">
-                    <CardTitle className="text-lg md:text-xl break-words whitespace-normal leading-tight">{initialData ? 'Edit Transaction' : 'Add Transaction'}</CardTitle>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="-mr-2 shrink-0">
+                    {/* Mobile Cancel Button (Left) */}
+                    <div className="sm:hidden flex-1">
+                        <button type="button" onClick={onClose} className="text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400">
+                            Cancel
+                        </button>
+                    </div>
+
+                    {/* Title */}
+                    <CardTitle className="text-lg md:text-xl break-words whitespace-normal leading-tight text-center sm:text-left flex-none sm:flex-1">
+                        {initialData ? 'Edit' : 'Add'} <span className="hidden sm:inline">Transaction</span>
+                    </CardTitle>
+
+                    {/* Desktop Close Button (Right) */}
+                    <Button variant="ghost" size="icon" onClick={onClose} className="hidden sm:inline-flex -mr-2 shrink-0">
                         <X className="h-4 w-4" />
                     </Button>
+
+                    {/* Mobile Save Button (Right) */}
+                    <div className="sm:hidden flex-1 flex justify-end">
+                        <button
+                            type="button"
+                            onClick={handleSave}
+                            className="text-sm font-bold text-brand-primary hover:text-brand-primary/80 transition-colors"
+                        >
+                            Save
+                        </button>
+                    </div>
                 </CardHeader>
 
                 <div className="flex flex-col sm:overflow-visible overflow-y-auto w-full md:h-auto min-h-0">
@@ -253,7 +276,8 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                         )}
                     </div>
 
-                    <div className="flex justify-end gap-3 border-t border-slate-100 p-4 pb-6 sm:p-6 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/20 sm:rounded-b-2xl">
+                    {/* Desktop Footer (Hidden on Mobile) */}
+                    <div className="hidden sm:flex justify-end gap-3 border-t border-slate-100 p-4 pb-6 sm:p-6 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/20 sm:rounded-b-2xl">
                         <Button variant="ghost" onClick={onClose}>
                             Cancel
                         </Button>
