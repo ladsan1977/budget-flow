@@ -372,6 +372,15 @@ export default function FixedExpensesPage() {
                                                 className="h-8 w-8 p-0 text-slate-400 hover:text-brand-primary"
                                                 onClick={() => setEditingTransaction(tx)}
                                             >
+                                                <Edit2 className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 w-8 p-0 text-slate-400 hover:text-red-500"
+                                                onClick={() => setTransactionToDelete(tx.id)}
+                                            >
+                                                <X className="h-4 w-4" />
                                             </Button>
                                         </>
                                     }
