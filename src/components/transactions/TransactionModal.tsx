@@ -168,8 +168,10 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                                             key={t}
                                             onClick={() => {
                                                 if (!lockType) {
-                                                    setType(t);
-                                                    setCategoryId('');
+                                                    if (t !== type) {
+                                                        setType(t);
+                                                        setCategoryId('');
+                                                    }
                                                 }
                                             }}
                                             disabled={lockType && t !== type}
@@ -296,7 +298,6 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                 categories={categories}
                 selectedId={categoryId}
                 type={type}
-                lockType={lockType}
                 onSelect={(newCategoryId) => {
                     setCategoryId(newCategoryId);
                     if (!lockType) {

@@ -13,7 +13,6 @@ export interface MobileCategorySelectorProps {
     selectedId?: string;
     onSelect: (categoryId: string) => void;
     type: TransactionType;
-    lockType?: boolean;
 }
 
 export function MobileCategorySelector({
@@ -23,7 +22,6 @@ export function MobileCategorySelector({
     selectedId,
     onSelect,
     type,
-    lockType = false,
 }: MobileCategorySelectorProps) {
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -134,9 +132,9 @@ export function MobileCategorySelector({
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-24 sm:pb-6 pt-5 custom-scrollbar">
-                    {(!lockType || type === 'income') && renderCategoryGroup('Income', incomeCategories)}
-                    {(!lockType || type === 'fixed') && renderCategoryGroup('Fixed Expenses', fixedCategories)}
-                    {(!lockType || type === 'variable') && renderCategoryGroup('Variable Expenses', variableCategories)}
+                    {type === 'income' && renderCategoryGroup('Income', incomeCategories)}
+                    {type === 'fixed' && renderCategoryGroup('Fixed Expenses', fixedCategories)}
+                    {type === 'variable' && renderCategoryGroup('Variable Expenses', variableCategories)}
 
                     {filteredCategories.length === 0 && (
                         <div className="text-center py-10 text-slate-500 dark:text-slate-400">
