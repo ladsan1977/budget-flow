@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Button } from '../ui/Button';
-import { cn } from '../../lib/utils';
-import type { Category, TransactionType } from '../../types';
+import { Button } from '../../../components/ui/Button';
+import { cn } from '../../../lib/utils';
+import type { Category, TransactionType } from '../../../types';
 import * as LucideIcons from 'lucide-react';
-import { resolveColor, PRESET_COLORS } from '../../lib/colors';
-import { PRESET_ICONS } from '../../lib/icons';
+import { resolveColor, PRESET_COLORS } from '../../../lib/colors';
+import { PRESET_ICONS } from '../../../lib/icons';
 
 const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 

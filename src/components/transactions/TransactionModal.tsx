@@ -4,13 +4,14 @@ import { Button } from '../ui/Button';
 import { useCategories } from '../../hooks/useCategories';
 import { useCreateTransaction, useUpdateTransaction } from '../../hooks/useTransactionMutations';
 import { formatCurrency, cn } from '../../lib/utils';
-import { X, AlertCircle, Check } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import type { Transaction, TransactionType } from '../../types';
 import { useDate } from '../../context/DateContext';
 import { useVariableBudgetLimit } from '../../hooks/useBudgets';
 import { MobileCategorySelector } from './MobileCategorySelector';
 import * as LucideIcons from 'lucide-react';
 import { resolveColor } from '../../lib/colors';
+import { ModalHeaderActions } from '../common/ModalHeaderActions';
 import { toast } from 'sonner';
 
 export interface TransactionModalProps {
@@ -126,29 +127,10 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                     </CardTitle>
 
                     <div className="flex items-center gap-2">
-                        {/* Mobile Header Buttons */}
-                        <div className="flex sm:hidden items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={onClose}
-                                className="h-8 w-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                size="icon"
-                                onClick={handleSave}
-                                className="h-8 w-8 rounded-full bg-brand-primary text-white hover:bg-brand-primary/90 shadow-sm"
-                            >
-                                <Check className="h-4 w-4" />
-                            </Button>
-                        </div>
-
-                        {/* Desktop Header Close Button */}
-                        <Button variant="ghost" size="icon" onClick={onClose} className="hidden sm:inline-flex -mr-2 shrink-0">
-                            <X className="h-4 w-4" />
-                        </Button>
+                        <ModalHeaderActions
+                            onCancel={onClose}
+                            onSubmit={handleSave}
+                        />
                     </div>
                 </CardHeader>
 
