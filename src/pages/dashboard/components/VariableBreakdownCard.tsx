@@ -6,12 +6,12 @@ import {
     CardContent,
     CardFooter,
     CardDescription,
-} from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { formatCurrency } from '../../lib/utils';
-import type { CategoryBreakdown } from '../../types';
+} from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
+import { formatCurrency } from '../../../lib/utils';
+import type { CategoryBreakdown } from '../../../types';
 
-import { resolveColor } from '../../lib/colors';
+import { resolveColor } from '../../../lib/colors';
 
 interface VariableBreakdownCardProps {
     /** Pre-computed category breakdown produced by the parent's useMemo. */
@@ -60,7 +60,12 @@ export function VariableBreakdownCard({ breakdown, className }: VariableBreakdow
                                             className="h-full transition-all duration-500"
                                             style={{
                                                 width: `${Math.min(item.percentOfBudget, 100)}%`,
-                                                backgroundColor: color,
+                                                backgroundColor:
+                                                    item.percentOfBudget > 90
+                                                        ? '#F43F5E' // Red (danger)
+                                                        : item.percentOfBudget >= 70
+                                                            ? '#F59E0B' // Yellow (warning)
+                                                            : '#10B981', // Green (success)
                                             }}
                                         />
                                     </div>
