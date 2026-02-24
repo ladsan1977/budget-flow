@@ -4,7 +4,7 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useDate } from '../../../context/DateContext';
 import { useDeleteTransaction, useUpdateTransaction, useBulkCreateTransactions, useBulkDeleteTransactions } from '../../../hooks/useTransactionMutations';
 import { shiftDateToTargetMonth } from '../../../lib/utils';
-import { fetchTransactionsByMonth } from '../../../services/supabaseData';
+import { fetchTransactionsByMonth } from '../../../services/transactions.service';
 import type { Transaction } from '../../../types';
 
 export function useFixedExpensesLogic() {

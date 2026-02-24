@@ -29,3 +29,4 @@ export function shiftDateToTargetMonth(dateStr: string, targetYear: number, targ
 
     return `${targetYear}-${String(targetMonth).padStart(2, '0')}-${String(validDay).padStart(2, '0')}`;
 }
+

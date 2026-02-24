@@ -1,5 +1,6 @@
 import { useQueries } from '@tanstack/react-query';
-import { fetchTransactionsByMonth, fetchBudgets } from '../services/supabaseData';
+import { fetchTransactionsByMonth } from '../services/transactions.service';
+import { fetchBudgets } from '../services/budgets.service';
 import { VARIABLE_CATEGORY_ID } from '../lib/constants';
 import type { DashboardStats } from '../types';
 import type { Transaction, BudgetGoal } from '../types';

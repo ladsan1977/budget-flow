@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createTransaction, updateTransaction, deleteTransaction, createMultipleTransactions, deleteTransactionsByMonthAndType } from '../services/supabaseData';
+import { createTransaction, updateTransaction, deleteTransaction, createMultipleTransactions, deleteTransactionsByMonthAndType } from '../services/transactions.service';
 import type { Transaction } from '../types';
 import { toast } from 'sonner';
 

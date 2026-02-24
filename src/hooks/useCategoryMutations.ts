@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createCategory, updateCategory, deleteCategory } from '../services/supabaseData';
+import { createCategory, updateCategory, deleteCategory } from '../services/categories.service';
 import type { Category } from '../types';
 import { toast } from 'sonner';
 

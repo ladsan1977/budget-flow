@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchTransactions, fetchTransactionsByMonth } from '../services/supabaseData';
+import { fetchTransactions, fetchTransactionsByMonth } from '../services/transactions.service';
 import type { Transaction } from '../types';
 import { useDate } from '../context/DateContext';
 import { useAuth } from '../context/AuthContext';

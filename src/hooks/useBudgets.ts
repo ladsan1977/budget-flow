@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchBudgets } from '../services/supabaseData';
+import { fetchBudgets } from '../services/budgets.service';
 import type { BudgetGoal } from '../types';
 import { VARIABLE_CATEGORY_ID } from '../lib/constants';
 import { useAuth } from '../context/AuthContext';
@@ -34,7 +34,7 @@ export function useVariableBudgetLimit(date: Date) {
 }
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { setMonthlyVariableBudget } from '../services/supabaseData';
+import { setMonthlyVariableBudget } from '../services/budgets.service';
 import { toast } from 'sonner';
 
 export function useUpdateBudget() {

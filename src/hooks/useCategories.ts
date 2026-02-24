@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchCategories } from '../services/supabaseData';
+import { fetchCategories } from '../services/categories.service';
 import type { Category } from '../types';
 import { useAuth } from '../context/AuthContext';
 
