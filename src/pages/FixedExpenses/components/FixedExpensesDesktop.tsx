@@ -1,12 +1,13 @@
-import { Card, CardContent } from '../../../components/ui/Card';
+import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { formatCurrency, cn } from '../../../lib/utils';
 import { Copy, Plus, Calendar, Edit2, X } from 'lucide-react';
 import type { FixedExpensesLogicReturn } from '../hooks/useFixedExpensesLogic';
+import { FixedExpensesStats } from './FixedExpensesStats';
 
 export function FixedExpensesDesktop({
     data: { monthName, year, transactions, categories },
-    stats: { totalFixedAmount, remainingToPay, completedCount, totalItems, pendingCount },
+    stats,
     modals: { setIsAddModalOpen, setEditingTransaction, setTransactionToDelete },
     actions: { handleReplicateClick, togglePaidStatus }
 }: FixedExpensesLogicReturn) {
@@ -39,49 +40,7 @@ export function FixedExpensesDesktop({
             </div>
 
             {/* Summary Cards Row */}
-            <div className="grid gap-4 grid-cols-3">
-                {/* Total Costs Card */}
-                <Card className="bg-white border-slate-200 dark:bg-[#151932] dark:border-[#252a41] shadow-sm hover:shadow-md transition-all">
-                    <CardContent className="p-6">
-                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Total Fixed Costs</p>
-                        <div className="text-3xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
-                            {formatCurrency(totalFixedAmount)}
-                        </div>
-                        <div className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1 font-medium">
-                            <span>↘ 2.4%</span> from last month
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Remaining to Pay Card */}
-                <Card className="bg-white border-slate-200 dark:bg-[#151932] dark:border-[#252a41] shadow-sm hover:shadow-md transition-all">
-                    <CardContent className="p-6">
-                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Remaining to Pay</p>
-                        <div className="text-3xl font-bold mb-4 text-slate-900 dark:text-white">{formatCurrency(remainingToPay)}</div>
-
-                        {/* Progress Bar */}
-                        <div className="h-2 w-full bg-slate-100 dark:bg-slate-800/50 rounded-full overflow-hidden">
-                            <div
-                                className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500"
-                                style={{ width: `${totalFixedAmount > 0 ? ((totalFixedAmount - remainingToPay) / totalFixedAmount) * 100 : 0}%` }}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Completed Payments Card */}
-                <Card className="bg-white border-slate-200 dark:bg-[#151932] dark:border-[#252a41] shadow-sm hover:shadow-md transition-all">
-                    <CardContent className="p-6">
-                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Completed Payments</p>
-                        <div className="text-3xl font-bold mb-2 text-slate-900 dark:text-white">
-                            {completedCount} <span className="text-slate-400 dark:text-slate-500 text-xl font-normal">/ {totalItems}</span>
-                        </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
-                            <span className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 px-2 py-0.5 rounded-full text-[10px] font-bold h-5 flex items-center justify-center min-w-[20px]">{pendingCount}</span> items pending action
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+            <FixedExpensesStats stats={stats} />
 
             {/* Desktop Expenses Table */}
             <Card className="flex overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex-col max-h-[500px]">

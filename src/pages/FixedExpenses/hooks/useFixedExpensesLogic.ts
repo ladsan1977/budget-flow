@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useTransactionsByMonth } from '../../../hooks/useTransactions';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDate } from '../../../context/DateContext';
@@ -6,12 +7,25 @@ import { useDeleteTransaction, useUpdateTransaction, useBulkCreateTransactions, 
 import { shiftDateToTargetMonth } from '../../../lib/utils';
 import { fetchTransactionsByMonth } from '../../../services/transactions.service';
 import type { Transaction } from '../../../types';
+import { useAuth } from '../../../context/AuthContext';
 
 export function useFixedExpensesLogic() {
     const { currentDate, monthName, year } = useDate();
+    const { user } = useAuth();
 
     const { data: transactions = [], error, isLoading } = useTransactionsByMonth('fixed');
     const { data: categories = [] } = useCategories();
+
+    const prevMonthDate = useMemo(() => {
+        return new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    }, [currentDate]);
+
+    const { data: prevMonthTransactions = [] } = useQuery<Transaction[], Error>({
+        queryKey: ['transactions', 'by-month', prevMonthDate.getFullYear(), prevMonthDate.getMonth() + 1, 'fixed', user?.id],
+        queryFn: () => fetchTransactionsByMonth(prevMonthDate, 'fixed'),
+        enabled: !!user,
+        staleTime: 1 * 60 * 1000,
+    });
 
     // Helper formatted string YYYY-MM
     const currentMonthStr = useMemo(() => {
@@ -57,9 +71,25 @@ export function useFixedExpensesLogic() {
         .filter(tx => tx.isPaid)
         .reduce((sum, tx) => sum + Number(tx.amount), 0);
 
-    const progressPercentage = totalFixedAmount > 0
-        ? Math.round((paidAmount / totalFixedAmount) * 100)
+    const paidPercentage = totalFixedAmount > 0
+        ? (paidAmount / totalFixedAmount) * 100
         : 0;
+
+    const pendingPercentage = totalFixedAmount > 0
+        ? (remainingToPay / totalFixedAmount) * 100
+        : 0;
+
+    const prevMonthTotalFixedAmount = useMemo(() => {
+        return prevMonthTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+    }, [prevMonthTransactions]);
+
+    const monthOverMonthChange = useMemo(() => {
+        if (prevMonthTotalFixedAmount === 0) {
+            return totalFixedAmount > 0 ? 100 : 0;
+        }
+        const diff = totalFixedAmount - prevMonthTotalFixedAmount;
+        return (diff / prevMonthTotalFixedAmount) * 100;
+    }, [totalFixedAmount, prevMonthTotalFixedAmount]);
 
     const totalItems = currentMonthFixedExpenses.length;
     const pendingCount = totalItems - completedCount;
@@ -77,10 +107,11 @@ export function useFixedExpensesLogic() {
         const currentYear = Number(yearStr);
         const currentMonth = Number(monthStr);
         // To get the first day of the previous month safely:
-        const prevMonthDate = new Date(currentYear, currentMonth - 2, 1);
+        // prevMonthDate is already defined, but wait, here we used (currentMonth - 2), let's keep it as is.
+        const prevMonthDateForReplicate = new Date(currentYear, currentMonth - 2, 1);
 
         try {
-            const prevMonthTxs = await fetchTransactionsByMonth(prevMonthDate, 'fixed');
+            const prevMonthTxs = await fetchTransactionsByMonth(prevMonthDateForReplicate, 'fixed');
 
             if (prevMonthTxs.length === 0) {
                 setInfoMessage(`There are no fixed expenses registered for the previous month to clone.`);
@@ -174,7 +205,9 @@ export function useFixedExpensesLogic() {
         stats: {
             totalFixedAmount,
             paidAmount,
-            progressPercentage,
+            paidPercentage,
+            pendingPercentage,
+            monthOverMonthChange,
             remainingToPay,
             completedCount,
             totalItems,
