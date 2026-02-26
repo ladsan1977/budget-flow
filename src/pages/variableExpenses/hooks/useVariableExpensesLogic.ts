@@ -31,6 +31,9 @@ export function useVariableExpensesLogic() {
     const [isEditingLimit, setIsEditingLimit] = useState(false);
     const [tempLimit, setTempLimit] = useState<number>(0);
 
+    // Modal state
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
     const totalSpent = useMemo(
         () => variableTransactions.reduce((acc, t) => acc + t.amount, 0),
         [variableTransactions]
@@ -90,6 +93,10 @@ export function useVariableExpensesLogic() {
             isEditingLimit,
             tempLimit,
             limitLoading,
+        },
+        modals: {
+            isAddModalOpen,
+            setIsAddModalOpen,
         },
         actions: {
             setIsEditingLimit,

@@ -25,7 +25,7 @@ export function VariableBreakdownCard({ breakdown, className }: VariableBreakdow
     return (
         <Card className={className}>
             <CardHeader>
-                <CardTitle>Variable Breakdown</CardTitle>
+                <CardTitle>Spending Breakdown</CardTitle>
                 <CardDescription>Where your money is going.</CardDescription>
             </CardHeader>
 

@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router'
 import {
     LayoutDashboard,
     Receipt,
-    PieChart,
+    Coins,
     History,
     BarChart3,
     Wallet,
@@ -17,7 +17,7 @@ import { useRouter } from '@tanstack/react-router'
 const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/fixed-expenses', label: 'Fixed Expenses', icon: Receipt },
-    { to: '/variable-budget', label: 'Variable Budget', icon: PieChart },
+    { to: '/variable-budget', label: 'Daily Budget', icon: Coins },
     { to: '/transactions', label: 'Transaction History', icon: History },
     { to: '/categories', label: 'Categories', icon: Tags },
     { to: '/reports', label: 'Reports', icon: BarChart3 },

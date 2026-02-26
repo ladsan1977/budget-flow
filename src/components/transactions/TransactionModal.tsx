@@ -156,30 +156,33 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                             {/* Type Selection */}
                             <div className="space-y-2 sm:col-span-2">
                                 <label className="text-sm font-medium text-slate-500">Transaction Type</label>
-                                <div className="grid grid-cols-3 gap-2 rounded-lg bg-slate-100 p-1 dark:bg-slate-900/50">
-                                    {(['income', 'fixed', 'variable'] as const).map((t) => (
-                                        <button
-                                            key={t}
-                                            onClick={() => {
-                                                if (!lockType) {
-                                                    if (t !== type) {
-                                                        setType(t);
-                                                        setCategoryId('');
+                                <div className="grid grid-cols-3 gap-1 sm:gap-2 rounded-lg bg-slate-100 p-1 dark:bg-slate-900/50">
+                                    {(['income', 'fixed', 'variable'] as const).map((t) => {
+                                        const label = t === 'income' ? 'Income' : t === 'fixed' ? 'Fixed Expenses' : 'Daily Budget';
+                                        return (
+                                            <button
+                                                key={t}
+                                                onClick={() => {
+                                                    if (!lockType) {
+                                                        if (t !== type) {
+                                                            setType(t);
+                                                            setCategoryId('');
+                                                        }
                                                     }
-                                                }
-                                            }}
-                                            disabled={lockType && t !== type}
-                                            className={cn(
-                                                "rounded-md px-3 py-2 text-sm font-medium transition-all capitalize",
-                                                type === t
-                                                    ? "bg-white text-slate-900 shadow-sm dark:bg-brand-surface dark:text-slate-100"
-                                                    : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200",
-                                                lockType && t !== type && "opacity-50 cursor-not-allowed hover:text-slate-500 dark:hover:text-slate-400"
-                                            )}
-                                        >
-                                            {t}
-                                        </button>
-                                    ))}
+                                                }}
+                                                disabled={lockType && t !== type}
+                                                className={cn(
+                                                    "rounded-md px-1 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all text-center",
+                                                    type === t
+                                                        ? "bg-white text-slate-900 shadow-sm dark:bg-brand-surface dark:text-slate-100"
+                                                        : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200",
+                                                    lockType && t !== type && "opacity-50 cursor-not-allowed hover:text-slate-500 dark:hover:text-slate-400"
+                                                )}
+                                            >
+                                                {label}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
 

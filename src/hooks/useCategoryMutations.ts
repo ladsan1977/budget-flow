@@ -15,7 +15,7 @@ export function useCreateCategory() {
         },
         onError: (error: Error) => {
             console.error('Failed to create category:', error);
-            toast.error(`Failed to create category: ${error.message}`);
+            toast.error(error.message);
         },
     });
 }
@@ -32,7 +32,7 @@ export function useUpdateCategory() {
         },
         onError: (error: Error) => {
             console.error('Failed to update category:', error);
-            toast.error(`Failed to update category: ${error.message}`);
+            toast.error(error.message);
         },
     });
 }
@@ -48,7 +48,7 @@ export function useDeleteCategory() {
         },
         onError: (error: Error) => {
             console.error('Failed to delete category:', error);
-            toast.error(`Failed to delete category: ${error.message}`);
+            toast.error(error.message);
         },
     });
 }

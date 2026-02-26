@@ -55,6 +55,12 @@ export interface DashboardStats {
     totalFixedExpenses: number;
     totalVariableExpenses: number;
     netFlow: number;
+    actualNetFlow: number;
+    projectedNetFlow: number;
+    paidFixedExpenses: number;
+    pendingFixedExpenses: number;
+    paidVariableExpenses: number;
+    pendingVariableExpenses: number;
     variableBudgetLimit: number;
     variableBudgetPercent: number;
 }

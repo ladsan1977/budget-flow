@@ -27,7 +27,17 @@ function computeStats(
         .filter(tx => tx.type === 'variable')
         .reduce((sum, tx) => sum + tx.amount, 0);
 
+    const paidFixedExpenses = transactions
+        .filter(tx => tx.type === 'fixed' && tx.isPaid)
+        .reduce((sum, tx) => sum + tx.amount, 0);
+
+    const paidVariableExpenses = transactions
+        .filter(tx => tx.type === 'variable' && tx.isPaid)
+        .reduce((sum, tx) => sum + tx.amount, 0);
+
     const netFlow = totalIncome - totalFixedExpenses - totalVariableExpenses;
+
+    const actualNetFlow = totalIncome - paidFixedExpenses - paidVariableExpenses;
 
     const variableBudgetLimit =
         budgets.find(b => b.categoryId === VARIABLE_CATEGORY_ID)?.amount ?? 0;
@@ -37,11 +47,24 @@ function computeStats(
             ? (totalVariableExpenses / variableBudgetLimit) * 100
             : 0;
 
+    // Use total budget/obligations for calculating projected and pending flows
+    const totalFixedBudget = totalFixedExpenses; // Assuming total fixed expenses IS the full obligation for the month based on the requirements context. If not, this needs clarifying.
+    const projectedNetFlow = totalIncome - totalFixedBudget - variableBudgetLimit;
+
+    const pendingFixedExpenses = totalFixedBudget - paidFixedExpenses;
+    const pendingVariableExpenses = Math.max(0, variableBudgetLimit - paidVariableExpenses);
+
     return {
         totalIncome,
         totalFixedExpenses,
         totalVariableExpenses,
         netFlow,
+        actualNetFlow,
+        projectedNetFlow,
+        paidFixedExpenses,
+        pendingFixedExpenses,
+        paidVariableExpenses,
+        pendingVariableExpenses,
         variableBudgetLimit,
         variableBudgetPercent,
     };

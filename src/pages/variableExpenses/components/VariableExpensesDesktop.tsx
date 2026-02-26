@@ -1,13 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
 import { formatCurrency, cn } from '../../../lib/utils';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
 import type { useVariableExpensesLogic } from './../hooks/useVariableExpensesLogic';
 import { VariableExpenseCategoryItem } from './VariableExpenseCategoryItem';
 import { VariableBudgetEditor } from './VariableBudgetEditor';
 
 type LogicData = ReturnType<typeof useVariableExpensesLogic>;
 
-export function VariableExpensesDesktop({ data, stats, state, actions }: LogicData) {
+export function VariableExpensesDesktop({ data, stats, state, actions, modals }: LogicData) {
     const { globalLimit } = data;
     const { totalSpent, remainingBalance, percentage, breakdown, statusColor, statusTextColor } = stats;
 
@@ -16,11 +17,17 @@ export function VariableExpensesDesktop({ data, stats, state, actions }: LogicDa
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Variable Budget
+                        Dayly Budget
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-1">
                         Track your discretionary spending against a global monthly goal.
                     </p>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button onClick={() => modals.setIsAddModalOpen(true)} variant="outline" className="gap-2 bg-white shrink-0 inline-flex">
+                        <Plus className="h-4 w-4" />
+                        <span>Add Spending</span>
+                    </Button>
                 </div>
             </div>
 

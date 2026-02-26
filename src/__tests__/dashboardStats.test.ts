@@ -21,7 +21,17 @@ function computeStats(transactions: Transaction[], budgets: BudgetGoal[]) {
         .filter(tx => tx.type === 'variable')
         .reduce((sum, tx) => sum + tx.amount, 0);
 
+    const paidFixedExpenses = transactions
+        .filter(tx => tx.type === 'fixed' && tx.isPaid)
+        .reduce((sum, tx) => sum + tx.amount, 0);
+
+    const paidVariableExpenses = transactions
+        .filter(tx => tx.type === 'variable' && tx.isPaid)
+        .reduce((sum, tx) => sum + tx.amount, 0);
+
     const netFlow = totalIncome - totalFixedExpenses - totalVariableExpenses;
+
+    const actualNetFlow = totalIncome - paidFixedExpenses - paidVariableExpenses;
 
     const variableBudgetLimit =
         budgets.find(b => b.categoryId === VARIABLE_CATEGORY_ID)?.amount ?? 0;
@@ -31,11 +41,22 @@ function computeStats(transactions: Transaction[], budgets: BudgetGoal[]) {
             ? (totalVariableExpenses / variableBudgetLimit) * 100
             : 0;
 
+    const projectedNetFlow = totalIncome - totalFixedExpenses - variableBudgetLimit;
+
+    const pendingFixedExpenses = totalFixedExpenses - paidFixedExpenses;
+    const pendingVariableExpenses = Math.max(0, variableBudgetLimit - paidVariableExpenses);
+
     return {
         totalIncome,
         totalFixedExpenses,
         totalVariableExpenses,
         netFlow,
+        actualNetFlow,
+        projectedNetFlow,
+        paidFixedExpenses,
+        pendingFixedExpenses,
+        paidVariableExpenses,
+        pendingVariableExpenses,
         variableBudgetLimit,
         variableBudgetPercent,
     };
@@ -73,6 +94,8 @@ describe('computeStats', () => {
         expect(result.totalFixedExpenses).toBe(1500);
         expect(result.totalVariableExpenses).toBe(500);
         expect(result.netFlow).toBe(3000); // 5000 - 1500 - 500
+        expect(result.actualNetFlow).toBe(3000); // Because they all default to true
+        expect(result.projectedNetFlow).toBe(2500); // 5000 - 1500 - 1000
         expect(result.variableBudgetLimit).toBe(1000);
         expect(result.variableBudgetPercent).toBe(50); // 500/1000 * 100
     });

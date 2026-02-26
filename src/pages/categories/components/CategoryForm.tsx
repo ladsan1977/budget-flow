@@ -46,33 +46,49 @@ export function CategoryForm({ id, initialData, onSubmit, onCancel, isLoading }:
 
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-500">Type</label>
-                    <div className="grid grid-cols-3 gap-2 rounded-lg bg-slate-100 p-1 dark:bg-slate-900/50">
-                        {(['income', 'fixed', 'variable'] as const).map((t) => (
-                            <button
-                                key={t}
-                                type="button"
-                                onClick={() => setType(t)}
-                                className={cn(
-                                    "rounded-md px-3 py-2 text-sm font-medium transition-all capitalize",
-                                    type === t
-                                        ? "bg-white text-slate-900 shadow-sm dark:bg-brand-surface dark:text-slate-100"
-                                        : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
-                                )}
-                            >
-                                {t}
-                            </button>
-                        ))}
+                    <div className="grid grid-cols-3 gap-1 sm:gap-2 rounded-lg bg-slate-100 p-1 dark:bg-slate-900/50">
+                        {(['income', 'fixed', 'variable'] as const).map((t) => {
+                            const label = t === 'income' ? 'Income' : t === 'fixed' ? 'Fixed Expenses' : 'Daily Budget';
+                            return (
+                                <button
+                                    key={t}
+                                    type="button"
+                                    onClick={() => setType(t)}
+                                    className={cn(
+                                        "rounded-md px-1 sm:px-3 py-2 text-xs sm:text-sm font-medium transition-all text-center",
+                                        type === t
+                                            ? "bg-white text-slate-900 shadow-sm dark:bg-brand-surface dark:text-slate-100"
+                                            : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
+                                    )}
+                                >
+                                    {label}
+                                </button>
+                            );
+                        })}
                     </div>
+                    {type === 'variable' && (
+                        <p className="text-xs text-slate-500 dark:text-slate-400 px-1">
+                            For flexible day-to-day spending
+                        </p>
+                    )}
                 </div>
 
                 <div className="space-y-6">
                     <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium text-slate-500">Pick an Icon</label>
+                        <div className="flex items-start sm:items-center justify-between gap-2">
+                            <label className="text-sm font-medium text-slate-500 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
+                                <span>Pick an Icon</span>
+                                {type === 'variable' && (
+                                    <span className="text-[10px] sm:text-[11px] font-normal text-brand-primary bg-brand-primary/10 px-2 py-0.5 rounded-full flex items-center w-fit">
+                                        <LucideIcons.Info className="w-3 h-3 mr-1" />
+                                        Counts towards monthly goal
+                                    </span>
+                                )}
+                            </label>
                             <button
                                 type="button"
                                 onClick={() => setIcon(getRandomItem(PRESET_ICONS))}
-                                className="text-xs text-brand-primary font-medium hover:underline"
+                                className="text-xs text-brand-primary font-medium hover:underline shrink-0 pt-0.5 sm:pt-0"
                             >
                                 Randomize
                             </button>

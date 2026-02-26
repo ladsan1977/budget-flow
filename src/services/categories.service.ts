@@ -99,6 +99,9 @@ export const deleteCategory = async (id: string): Promise<void> => {
         .eq('user_id', userId);
 
     if (error) {
+        if (error.code === '23503') {
+            throw new Error('Cannot delete this category because it is still being used by one or more transactions.');
+        }
         handleSupabaseError(error, 'Failed to delete category');
     }
 };

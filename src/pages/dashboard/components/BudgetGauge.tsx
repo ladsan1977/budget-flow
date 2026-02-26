@@ -2,25 +2,26 @@ import { cn, formatCurrency } from '../../../lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 
 interface BudgetGaugeProps {
-    netFlow: number;
+    actualNetFlow: number;
+    projectedNetFlow: number;
     totalIncome: number;
     className?: string;
 }
 
-export function BudgetGauge({ netFlow, totalIncome, className }: BudgetGaugeProps) {
-    // Health percentage: how much of the income is remaining as net cash flow
-    // If netFlow is negative or income is 0, health is 0%
+export function BudgetGauge({ actualNetFlow, projectedNetFlow, totalIncome, className }: BudgetGaugeProps) {
+    // Health percentage: how much of the income is remaining as actual net cash flow
+    // If actualNetFlow is negative or income is 0, health is 0%
     const healthPercent = totalIncome > 0
-        ? Math.max(0, Math.min((netFlow / totalIncome) * 100, 100))
+        ? Math.max(0, Math.min((actualNetFlow / totalIncome) * 100, 100))
         : 0;
 
-    const gaugeColor = netFlow < 0
+    const gaugeColor = actualNetFlow < 0
         ? 'text-brand-danger'
         : healthPercent < 10
             ? 'text-brand-warning'
             : 'text-brand-success';
 
-    const gaugeStroke = netFlow < 0
+    const gaugeStroke = actualNetFlow < 0
         ? '#F43F5E' // brand-danger
         : healthPercent < 10
             ? '#F59E0B' // brand-warning
@@ -68,7 +69,7 @@ export function BudgetGauge({ netFlow, totalIncome, className }: BudgetGaugeProp
                     </svg>
                     <div className="absolute flex flex-col items-center">
                         <span className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                            {formatCurrency(netFlow)}
+                            {formatCurrency(actualNetFlow)}
                         </span>
                         <span className="text-xs text-slate-500 font-medium">NET FLOW</span>
                     </div>
@@ -90,6 +91,9 @@ export function BudgetGauge({ netFlow, totalIncome, className }: BudgetGaugeProp
                     </div>
                 </div>
             </CardContent>
+            <div className="border-t border-slate-200 dark:border-slate-800 p-4 text-center text-sm font-medium text-slate-600 dark:text-slate-400">
+                Projected end of month: <span className={projectedNetFlow >= 0 ? 'text-brand-success' : 'text-brand-danger'}>{formatCurrency(projectedNetFlow)}</span>
+            </div>
         </Card>
     );
 }

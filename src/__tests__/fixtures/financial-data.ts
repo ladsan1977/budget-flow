@@ -88,7 +88,16 @@ export const calculateMockDashboardStats = (currentDate: Date) => {
     const totalIncome = txs.filter(tx => tx.type === 'income').reduce((s, tx) => s + tx.amount, 0);
     const totalFixed = txs.filter(tx => tx.type === 'fixed').reduce((s, tx) => s + tx.amount, 0);
     const totalVariable = txs.filter(tx => tx.type === 'variable').reduce((s, tx) => s + tx.amount, 0);
+    const paidFixed = txs.filter(tx => tx.type === 'fixed' && tx.isPaid).reduce((s, tx) => s + tx.amount, 0);
+    const paidVariable = txs.filter(tx => tx.type === 'variable' && tx.isPaid).reduce((s, tx) => s + tx.amount, 0);
+
     const netFlow = totalIncome - totalFixed - totalVariable;
+    const actualNetFlow = totalIncome - paidFixed - paidVariable;
+    const projectedNetFlow = totalIncome - totalFixed - MOCK_VARIABLE_BUDGET_LIMIT;
+
+    const pendingFixed = totalFixed - paidFixed;
+    const pendingVariable = Math.max(0, MOCK_VARIABLE_BUDGET_LIMIT - paidVariable);
+
     const variablePercent = MOCK_VARIABLE_BUDGET_LIMIT > 0
         ? (totalVariable / MOCK_VARIABLE_BUDGET_LIMIT) * 100
         : 0;
@@ -98,6 +107,12 @@ export const calculateMockDashboardStats = (currentDate: Date) => {
         totalFixed,
         totalVariable,
         netFlow,
+        actualNetFlow,
+        projectedNetFlow,
+        paidFixedExpenses: paidFixed,
+        pendingFixedExpenses: pendingFixed,
+        paidVariableExpenses: paidVariable,
+        pendingVariableExpenses: pendingVariable,
         variableBudgetLimit: MOCK_VARIABLE_BUDGET_LIMIT,
         variablePercent,
     };

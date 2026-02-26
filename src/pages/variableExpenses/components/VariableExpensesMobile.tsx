@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/Card';
+import { Button } from '../../../components/ui/Button';
 import { formatCurrency, cn } from '../../../lib/utils';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
 import { MonthSelector } from '../../../components/common/MonthSelector';
 import type { useVariableExpensesLogic } from '../hooks/useVariableExpensesLogic';
 import { VariableExpenseCategoryItem } from './VariableExpenseCategoryItem';
@@ -8,7 +9,7 @@ import { VariableBudgetEditor } from './VariableBudgetEditor';
 
 type LogicData = ReturnType<typeof useVariableExpensesLogic>;
 
-export function VariableExpensesMobile({ data, stats, state, actions }: LogicData) {
+export function VariableExpensesMobile({ data, stats, state, actions, modals }: LogicData) {
     const { globalLimit } = data;
     const { totalSpent, remainingBalance, percentage, breakdown, statusColor, statusTextColor } = stats;
 
@@ -17,8 +18,14 @@ export function VariableExpensesMobile({ data, stats, state, actions }: LogicDat
             <div className="sticky top-16 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Variable Budget
+                        Daily Budget
                     </h1>
+                    <div className="flex items-center gap-2">
+                        <Button onClick={() => modals.setIsAddModalOpen(true)} variant="outline" size="sm" className="shadow-lg shadow-brand-primary/20 shrink-0 gap-2 h-10 px-3 flex">
+                            <Plus className="h-4 w-4" />
+                            <span className="text-sm font-medium">Add Spending</span>
+                        </Button>
+                    </div>
                 </div>
                 <div className="flex justify-start w-full">
                     <MonthSelector />

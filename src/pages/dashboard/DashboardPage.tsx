@@ -12,6 +12,7 @@ export default function DashboardPage() {
         overallBudgetUsagePercentage,
         gaugeColor,
         gaugeStroke,
+        flowComposition,
         isLoading,
         error,
         refetch,
@@ -38,6 +39,7 @@ export default function DashboardPage() {
         overallBudgetUsagePercentage,
         gaugeColor,
         gaugeStroke,
+        flowComposition,
         monthName,
         year
     };

@@ -79,12 +79,32 @@ export function useDashboardLogic() {
                 : '#10B981';
     }, [stats]);
 
+    const flowComposition = useMemo(() => {
+        if (!stats) {
+            return {
+                totalIncome: 0,
+                paidFixed: 0,
+                pendingFixed: 0,
+                paidVariable: 0,
+                pendingVariable: 0,
+            };
+        }
+        return {
+            totalIncome: stats.totalIncome ?? 0,
+            paidFixed: stats.paidFixedExpenses ?? 0,
+            pendingFixed: stats.pendingFixedExpenses ?? 0,
+            paidVariable: stats.paidVariableExpenses ?? 0,
+            pendingVariable: stats.pendingVariableExpenses ?? 0,
+        };
+    }, [stats]);
+
     return {
         stats,
         variableBreakdown,
         overallBudgetUsagePercentage,
         gaugeColor,
         gaugeStroke,
+        flowComposition,
         isLoading,
         error,
         refetch,
