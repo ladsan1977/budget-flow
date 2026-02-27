@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '../ui/Card';
 import { formatCurrency, cn } from '../../lib/utils';
@@ -8,7 +9,7 @@ export interface StatCardProps {
     icon: LucideIcon;
     /** Color class for the Icon (e.g. text-brand-success) */
     iconColor?: string;
-    description?: string;
+    description?: ReactNode;
     /** Color class for the description text (e.g. text-brand-success) */
     descriptionColor?: string;
     /** Color class for the amount text, used for conditional formatting like Net Cash Flow */

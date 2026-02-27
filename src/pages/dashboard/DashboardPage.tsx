@@ -8,6 +8,7 @@ import { DashboardMobile } from './components/DashboardMobile';
 export default function DashboardPage() {
     const {
         stats,
+        incomeMomChange,
         variableBreakdown,
         overallBudgetUsagePercentage,
         gaugeColor,
@@ -35,6 +36,7 @@ export default function DashboardPage() {
 
     const viewProps = {
         stats,
+        incomeMomChange,
         variableBreakdown,
         overallBudgetUsagePercentage,
         gaugeColor,

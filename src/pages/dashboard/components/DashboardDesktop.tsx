@@ -12,6 +12,7 @@ import type { useDashboardLogic } from '../hooks/useDashboardLogic';
 type LogicData = ReturnType<typeof useDashboardLogic>;
 interface DashboardDesktopProps {
     stats: NonNullable<LogicData['stats']>;
+    incomeMomChange: LogicData['incomeMomChange'];
     variableBreakdown: LogicData['variableBreakdown'];
     overallBudgetUsagePercentage: LogicData['overallBudgetUsagePercentage'];
     gaugeColor: LogicData['gaugeColor'];
@@ -23,6 +24,7 @@ interface DashboardDesktopProps {
 
 export function DashboardDesktop({
     stats,
+    incomeMomChange,
     variableBreakdown,
     gaugeColor,
     gaugeStroke,
@@ -61,7 +63,20 @@ export function DashboardDesktop({
                     amount={stats.totalIncome}
                     icon={Wallet}
                     iconColor="text-brand-success"
-                    description="+20.1% from last month"
+                    description={
+                        incomeMomChange !== null && incomeMomChange !== undefined
+                            ? (
+                                <span className={`flex items-center gap-1 font-medium ${incomeMomChange > 0 ? 'text-emerald-500 dark:text-emerald-400' :
+                                        incomeMomChange < 0 ? 'text-rose-500 dark:text-rose-400' :
+                                            'text-slate-500 dark:text-slate-400'
+                                    }`}>
+                                    {incomeMomChange > 0 ? '↗ ' : ''}
+                                    {incomeMomChange < 0 ? '↘ ' : ''}
+                                    {Math.abs(incomeMomChange).toFixed(1)}% from last month
+                                </span>
+                            )
+                            : undefined
+                    }
                     className="border-brand-success/50 dark:border-brand-success/40"
                 />
                 <StatCard

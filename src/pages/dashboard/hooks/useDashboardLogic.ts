@@ -1,16 +1,42 @@
 import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useDashboardStats } from '../../../hooks/useDashboardStats';
 import { useTransactionsByMonth } from '../../../hooks/useTransactions';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDate } from '../../../context/DateContext';
-import type { CategoryBreakdown } from '../../../types';
+import { useAuth } from '../../../context/AuthContext';
+import { fetchTransactionsByMonth } from '../../../services/transactions.service';
+import type { CategoryBreakdown, Transaction } from '../../../types';
 
 export function useDashboardLogic() {
     const { currentDate, monthName, year } = useDate();
+    const { user } = useAuth();
 
     const { data: stats, isLoading, error, refetch } = useDashboardStats(currentDate);
     const { data: variableTransactions = [] } = useTransactionsByMonth('variable');
     const { data: categories = [] } = useCategories();
+
+    const prevMonthDate = useMemo(() => {
+        return new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    }, [currentDate]);
+
+    const { data: prevMonthIncomeTxs = [] } = useQuery<Transaction[], Error>({
+        queryKey: ['transactions', 'by-month', prevMonthDate.getFullYear(), prevMonthDate.getMonth() + 1, 'income', user?.id],
+        queryFn: () => fetchTransactionsByMonth(prevMonthDate, 'income'),
+        enabled: !!user,
+        staleTime: 1 * 60 * 1000,
+    });
+
+    const incomeMomChange = useMemo(() => {
+        if (!stats) return null;
+        const prevMonthTotalIncome = prevMonthIncomeTxs.reduce((sum, tx) => sum + tx.amount, 0);
+
+        if (prevMonthTotalIncome === 0) {
+            return stats.totalIncome > 0 ? 100 : 0;
+        }
+        const diff = stats.totalIncome - prevMonthTotalIncome;
+        return (diff / prevMonthTotalIncome) * 100;
+    }, [stats?.totalIncome, prevMonthIncomeTxs]);
 
     /**
      * Groups variable transactions by categoryId using a Map for O(n) performance,
@@ -100,6 +126,7 @@ export function useDashboardLogic() {
 
     return {
         stats,
+        incomeMomChange,
         variableBreakdown,
         overallBudgetUsagePercentage,
         gaugeColor,
