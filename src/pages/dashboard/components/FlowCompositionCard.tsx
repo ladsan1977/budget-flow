@@ -57,7 +57,7 @@ export function FlowCompositionCard({
                             <span className="font-semibold">{formatCurrency(totalIncome)}</span>
                         </div>
                     </div>
-                    <div className="w-full h-4 sm:h-5 bg-brand-success/20 rounded-full flex overflow-hidden">
+                    <div className="w-full h-4 bg-brand-success/20 rounded-full flex overflow-hidden">
                         <div className="h-full bg-brand-success transition-all duration-500" style={{ width: '100%' }} />
                     </div>
                 </div>
@@ -71,9 +71,9 @@ export function FlowCompositionCard({
                             <span className="font-semibold">{formatCurrency(totalFixed)}</span>
                         </div>
                     </div>
-                    <div className="w-full h-4 sm:h-5 bg-slate-100 dark:bg-slate-800 rounded-full flex overflow-hidden">
+                    <div className="w-full h-4 bg-slate-100 dark:bg-slate-700 rounded-full flex overflow-hidden">
                         <div className="h-full bg-brand-primary transition-all duration-500" style={{ width: `${fixedPaidPct}%` }} />
-                        <div className="h-full bg-brand-primary/20 transition-all duration-500" style={{ width: `${fixedPendingPct}%` }} />
+                        <div className="h-full bg-brand-primary/40 dark:bg-brand-primary/50 transition-all duration-500" style={{ width: `${fixedPendingPct}%` }} />
                     </div>
                     <div className="flex justify-between text-xs text-slate-500">
                         <span>Paid: <strong>{formatCurrency(paidFixed)}</strong></span>
@@ -90,9 +90,9 @@ export function FlowCompositionCard({
                             <span className="font-semibold">{formatCurrency(totalVar)}</span>
                         </div>
                     </div>
-                    <div className="w-full h-4 sm:h-5 bg-slate-100 dark:bg-slate-800 rounded-full flex overflow-hidden">
+                    <div className="w-full h-4 bg-slate-100 dark:bg-slate-700 rounded-full flex overflow-hidden">
                         <div className="h-full bg-brand-warning transition-all duration-500" style={{ width: `${varPaidPct}%` }} />
-                        <div className="h-full bg-brand-warning/20 transition-all duration-500" style={{ width: `${varPendingPct}%` }} />
+                        <div className="h-full bg-brand-warning/40 dark:bg-brand-warning/50 transition-all duration-500" style={{ width: `${varPendingPct}%` }} />
                     </div>
                     <div className="flex justify-between text-xs text-slate-500">
                         <span>Paid: <strong>{formatCurrency(paidVariable)}</strong></span>

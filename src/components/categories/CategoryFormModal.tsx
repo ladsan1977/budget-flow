@@ -39,7 +39,7 @@ export function CategoryFormModal({ isOpen, onClose, initialName, initialType, o
     };
 
     return (
-        <div className="fixed inset-0 z-[70] sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+        <div className="fixed inset-0 z-[170] sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
             <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
             <Card
                 className={cn(

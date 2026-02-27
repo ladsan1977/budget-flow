@@ -69,6 +69,12 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                 setCategoryId('');
                 setIsPaid(false);
             }
+        } else {
+            // Reset state eagerly when modal closes to prevent old data from flashing or racing with autoFocus on next open
+            setDescription('');
+            setAmount('');
+            setCategoryId('');
+            setIsPaid(false);
         }
     }, [isOpen, currentDate, initialType, initialData]);
 
@@ -121,7 +127,7 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
     };
 
     return (
-        <div className="fixed inset-0 z-50 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+        <div className="fixed inset-0 z-[150] sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
             <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
 
             <Card className="fixed top-10 bottom-24 left-4 right-4 sm:relative sm:top-auto sm:bottom-auto sm:left-auto sm:right-auto sm:w-full sm:max-w-lg sm:h-auto flex flex-col transform overflow-hidden sm:overflow-visible rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in zoom-in-95 duration-200">
@@ -134,6 +140,7 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                         <ModalHeaderActions
                             onCancel={onClose}
                             onSubmit={handleSave}
+                            isPending={createMutation.isPending || updateMutation.isPending}
                         />
                     </div>
                 </CardHeader>
@@ -248,7 +255,7 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                                     type="date"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
-                                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-base md:text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
+                                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-base md:text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100 [color-scheme:light] dark:[color-scheme:dark]"
                                 />
                             </div>
 
@@ -280,11 +287,15 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
 
                     {/* Desktop Footer (Hidden on Mobile) */}
                     <div className="hidden sm:flex justify-end gap-3 border-t border-slate-100 p-4 pb-6 sm:p-6 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/20 sm:rounded-b-2xl">
-                        <Button variant="ghost" onClick={onClose}>
+                        <Button variant="ghost" onClick={onClose} disabled={createMutation.isPending || updateMutation.isPending}>
                             Cancel
                         </Button>
-                        <Button onClick={handleSave} className="px-8 shadow-lg shadow-brand-primary/20">
-                            {initialData ? 'Save Changes' : 'Save Transaction'}
+                        <Button
+                            onClick={handleSave}
+                            disabled={createMutation.isPending || updateMutation.isPending}
+                            className="px-8 shadow-lg shadow-brand-primary/20"
+                        >
+                            {(createMutation.isPending || updateMutation.isPending) ? 'Saving...' : (initialData ? 'Save Changes' : 'Save Transaction')}
                         </Button>
                     </div>
                 </div>

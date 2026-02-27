@@ -55,6 +55,7 @@ function computeStats(
     const pendingVariableExpenses = Math.max(0, variableBudgetLimit - paidVariableExpenses);
 
     return {
+        totalTransactions: transactions.length,
         totalIncome,
         totalFixedExpenses,
         totalVariableExpenses,

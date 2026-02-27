@@ -4,10 +4,13 @@ import { useDashboardLogic } from './hooks/useDashboardLogic';
 import { useIsMobile } from '../../hooks/ui/useIsMobile';
 import { DashboardDesktop } from './components/DashboardDesktop';
 import { DashboardMobile } from './components/DashboardMobile';
+import { useTransactionModal } from '../../context/TransactionModalContext';
 
 export default function DashboardPage() {
     const {
         stats,
+        isEmptyState,
+        isFirstTimeUser,
         incomeMomChange,
         variableBreakdown,
         overallBudgetUsagePercentage,
@@ -21,6 +24,7 @@ export default function DashboardPage() {
         year
     } = useDashboardLogic();
     const isMobile = useIsMobile();
+    const { isOpen: isTransactionModalOpen } = useTransactionModal();
 
     if (isLoading) {
         return <DashboardSkeleton />;
@@ -34,8 +38,17 @@ export default function DashboardPage() {
         return null;
     }
 
+    const isLocked = isEmptyState;
+    // Show the onboarding overlay for ANY empty month so the user knows there
+    // is no data. The overlay itself adapts its content based on isFirstTimeUser:
+    // - true  → full setup tutorial (new user, no escape needed)
+    // - false → lightweight "no data" panel with a ← Go back button
+    const shouldShowOnboarding = isEmptyState && !isTransactionModalOpen;
+
     const viewProps = {
         stats,
+        isEmptyState,
+        isFirstTimeUser,
         incomeMomChange,
         variableBreakdown,
         overallBudgetUsagePercentage,
@@ -43,7 +56,9 @@ export default function DashboardPage() {
         gaugeStroke,
         flowComposition,
         monthName,
-        year
+        year,
+        isLocked,
+        shouldShowOnboarding
     };
 
     return isMobile ? (

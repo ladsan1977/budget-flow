@@ -6,6 +6,7 @@ import { useCategories } from '../../../hooks/useCategories';
 import { useDate } from '../../../context/DateContext';
 import { useAuth } from '../../../context/AuthContext';
 import { fetchTransactionsByMonth } from '../../../services/transactions.service';
+import { supabase } from '../../../lib/supabase';
 import type { CategoryBreakdown, Transaction } from '../../../types';
 
 export function useDashboardLogic() {
@@ -15,6 +16,22 @@ export function useDashboardLogic() {
     const { data: stats, isLoading, error, refetch } = useDashboardStats(currentDate);
     const { data: variableTransactions = [] } = useTransactionsByMonth('variable');
     const { data: categories = [] } = useCategories();
+
+    // Check if user has ANY transactions across all months (not just current).
+    // Used to distinguish a brand-new user (show full onboarding) from a user
+    // who navigated to a future/empty month (show lighter empty state).
+    const { data: hasAnyTransactions = false } = useQuery<boolean, Error>({
+        queryKey: ['transactions', 'any-exists', user?.id],
+        queryFn: async () => {
+            const { count } = await supabase
+                .from('transactions')
+                .select('id', { count: 'exact', head: true })
+                .limit(1);
+            return (count ?? 0) > 0;
+        },
+        enabled: !!user,
+        staleTime: 5 * 60 * 1000,
+    });
 
     const prevMonthDate = useMemo(() => {
         return new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
@@ -36,7 +53,7 @@ export function useDashboardLogic() {
         }
         const diff = stats.totalIncome - prevMonthTotalIncome;
         return (diff / prevMonthTotalIncome) * 100;
-    }, [stats?.totalIncome, prevMonthIncomeTxs]);
+    }, [stats, prevMonthIncomeTxs]);
 
     /**
      * Groups variable transactions by categoryId using a Map for O(n) performance,
@@ -124,8 +141,14 @@ export function useDashboardLogic() {
         };
     }, [stats]);
 
+    const isEmptyState = stats?.totalTransactions === 0;
+    // True only when this is a genuine first-time user with no data anywhere.
+    const isFirstTimeUser = isEmptyState && !hasAnyTransactions;
+
     return {
         stats,
+        isEmptyState,
+        isFirstTimeUser,
         incomeMomChange,
         variableBreakdown,
         overallBudgetUsagePercentage,

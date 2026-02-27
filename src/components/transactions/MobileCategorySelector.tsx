@@ -102,7 +102,7 @@ export function MobileCategorySelector({
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center sm:p-6">
+        <div className="fixed inset-0 z-[160] flex items-end sm:items-center justify-center sm:p-6">
             <div
                 className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
                 onClick={onClose}

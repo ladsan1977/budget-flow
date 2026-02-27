@@ -51,6 +51,7 @@ export interface BudgetGoal {
  * Calculated by the useDashboardStats hook via TanStack Query select transforms.
  */
 export interface DashboardStats {
+    totalTransactions: number;
     totalIncome: number;
     totalFixedExpenses: number;
     totalVariableExpenses: number;
