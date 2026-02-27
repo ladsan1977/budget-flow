@@ -13,6 +13,7 @@ export interface MobileCategorySelectorProps {
     selectedId?: string;
     onSelect: (categoryId: string) => void;
     type: TransactionType;
+    onCreateNew?: (initialName: string) => void;
 }
 
 export function MobileCategorySelector({
@@ -22,6 +23,7 @@ export function MobileCategorySelector({
     selectedId,
     onSelect,
     type,
+    onCreateNew,
 }: MobileCategorySelectorProps) {
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -138,7 +140,29 @@ export function MobileCategorySelector({
 
                     {filteredCategories.length === 0 && (
                         <div className="text-center py-10 text-slate-500 dark:text-slate-400">
-                            <p className="text-sm">No categories found matching "{searchQuery}"</p>
+                            <p className="text-sm mb-4">No categories found matching "{searchQuery}"</p>
+                            {onCreateNew && (
+                                <Button
+                                    onClick={() => onCreateNew(searchQuery)}
+                                    className="gap-2 shadow-lg shadow-brand-primary/20"
+                                >
+                                    <LucideIcons.Plus className="w-4 h-4" />
+                                    Create "{searchQuery}"
+                                </Button>
+                            )}
+                        </div>
+                    )}
+
+                    {filteredCategories.length > 0 && onCreateNew && (
+                        <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-center pb-4">
+                            <Button
+                                variant="outline"
+                                className="w-full max-w-xs gap-2 border-brand-primary/20 text-brand-primary hover:bg-brand-primary/5"
+                                onClick={() => onCreateNew('')}
+                            >
+                                <LucideIcons.Plus className="w-4 h-4" />
+                                Create New Category
+                            </Button>
                         </div>
                     )}
                 </div>

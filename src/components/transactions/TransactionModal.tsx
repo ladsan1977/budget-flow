@@ -12,6 +12,7 @@ import { MobileCategorySelector } from './MobileCategorySelector';
 import * as LucideIcons from 'lucide-react';
 import { resolveColor } from '../../lib/colors';
 import { ModalHeaderActions } from '../common/ModalHeaderActions';
+import { CategoryFormModal } from '../categories/CategoryFormModal';
 import { toast } from 'sonner';
 
 export interface TransactionModalProps {
@@ -38,6 +39,8 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
     const [categoryId, setCategoryId] = useState('');
     const [isPaid, setIsPaid] = useState(false);
     const [isCategorySelectorOpen, setIsCategorySelectorOpen] = useState(false);
+    const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
+    const [createCategoryInitialName, setCreateCategoryInitialName] = useState('');
 
     // Initial Date Logic
     useEffect(() => {
@@ -303,6 +306,26 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                             setType(category.type);
                         }
                     }
+                }}
+                onCreateNew={(name) => {
+                    // Close the selector briefly, or leave it behind. Leaving it open is fine 
+                    // since the Create modal will be on top (z-[70] vs z-[60]).
+                    setCreateCategoryInitialName(name);
+                    setIsCreateCategoryOpen(true);
+                }}
+            />
+
+            <CategoryFormModal
+                isOpen={isCreateCategoryOpen}
+                onClose={() => setIsCreateCategoryOpen(false)}
+                initialName={createCategoryInitialName}
+                initialType={type}
+                onSuccess={(newCategoryId) => {
+                    setCategoryId(newCategoryId);
+                    // The new category type is already matched to the form's initialType (or user set),
+                    // so we don't strictly need to do `setType(newCategoryType)` here, 
+                    // but it's safe to assume the user wants it selected and we just close the selector.
+                    setIsCategorySelectorOpen(false);
                 }}
             />
         </div>
