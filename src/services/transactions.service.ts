@@ -17,7 +17,8 @@ export const fetchTransactions = async (): Promise<Transaction[]> => {
         .from('transactions')
         .select('*')
         .eq('user_id', userId)
-        .order('date', { ascending: false });
+        .order('date', { ascending: false })
+        .order('id', { ascending: false });
 
     if (error) {
         handleSupabaseError(error, 'Failed to fetch transactions');
@@ -48,7 +49,9 @@ export const fetchTransactionsByMonth = async (
         query = query.eq('type', type);
     }
 
-    const { data, error } = await query.order('date', { ascending: false });
+    const { data, error } = await query
+        .order('date', { ascending: false })
+        .order('id', { ascending: false });
 
     if (error) {
         handleSupabaseError(error, 'Failed to fetch transactions');

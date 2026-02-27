@@ -1,7 +1,7 @@
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { cn } from '../../../lib/utils';
-import { Plus, Search, CheckCircle2, Clock, Edit2, X } from 'lucide-react';
+import { Plus, Search, Edit2, X } from 'lucide-react';
 import type { TransactionType } from '../../../types';
 import type { TransactionsLogicReturn } from '../hooks/useTransactionsLogic';
 import { MobileDataCard } from '../../../components/ui/MobileDataCard';
@@ -19,6 +19,7 @@ const getBadgeVariant = (txType: TransactionType) => {
 export function TransactionsMobile({
     data: { transactions, categories },
     modals: { setIsAddModalOpen, setEditingTransaction, setTransactionToDelete },
+    actions: { togglePaidStatus }
 }: TransactionsLogicReturn) {
     return (
         <div className="space-y-6 animate-in fade-in duration-500 md:hidden">
@@ -70,15 +71,17 @@ export function TransactionsMobile({
                                     <Badge variant={getBadgeVariant(tx.type)} className="text-[10px] px-1.5 py-0">
                                         {tx.type === 'income' ? 'Income' : tx.type === 'fixed' ? 'Fixed Expenses' : tx.type === 'variable' ? 'Daily Budget' : tx.type}
                                     </Badge>
-                                    {tx.isPaid ? (
-                                        <div className="flex items-center gap-1 text-xs font-medium text-brand-success">
-                                            <CheckCircle2 className="h-3 w-3" /> Paid
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center gap-1 text-xs font-medium text-slate-500">
-                                            <Clock className="h-3 w-3" /> Pending
-                                        </div>
-                                    )}
+                                    <button
+                                        onClick={() => togglePaidStatus(tx.id, tx.isPaid)}
+                                        className={cn(
+                                            "inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[10px] font-bold transition-all min-w-[50px]",
+                                            tx.isPaid
+                                                ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400"
+                                                : "bg-orange-100 text-orange-700 hover:bg-orange-200 dark:bg-orange-900/30 dark:text-orange-400"
+                                        )}
+                                    >
+                                        {tx.isPaid ? 'Paid' : 'Pending'}
+                                    </button>
                                 </div>
                             }
                             actions={

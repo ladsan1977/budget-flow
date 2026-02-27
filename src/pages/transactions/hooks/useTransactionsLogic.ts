@@ -1,13 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useTransactionsByMonth } from '../../../hooks/useTransactions';
 import { useCategories } from '../../../hooks/useCategories';
-import { useDeleteTransaction } from '../../../hooks/useTransactionMutations';
+import { useDeleteTransaction, useUpdateTransaction } from '../../../hooks/useTransactionMutations';
 import type { Transaction, TransactionType } from '../../../types';
 
 export function useTransactionsLogic() {
-    const { data: transactions = [], error, refetch, isPending } = useTransactionsByMonth();
+    const { data: transactions = [], error, refetch, isPending: isQueryPending } = useTransactionsByMonth();
     const { data: categories = [] } = useCategories();
     const deleteMutation = useDeleteTransaction();
+    const updateMutation = useUpdateTransaction();
 
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
@@ -25,7 +26,11 @@ export function useTransactionsLogic() {
             // Priority 2: Date ascending
             const dateA = new Date(a.date).getTime();
             const dateB = new Date(b.date).getTime();
-            return dateA - dateB;
+            const dateDiff = dateA - dateB;
+            if (dateDiff !== 0) return dateDiff;
+
+            // Priority 3: Stable sort by ID
+            return a.id.localeCompare(b.id);
         });
     }, [transactions]);
 
@@ -35,6 +40,15 @@ export function useTransactionsLogic() {
             setTransactionToDelete(null);
         }
     };
+
+    const togglePaidStatus = (id: string, currentStatus: boolean) => {
+        updateMutation.mutate({
+            id,
+            updates: { isPaid: !currentStatus }
+        });
+    };
+
+    const isPending = isQueryPending || deleteMutation.isPending || updateMutation.isPending;
 
     return {
         data: {
@@ -48,6 +62,7 @@ export function useTransactionsLogic() {
         },
         actions: {
             confirmDeleteTransaction,
+            togglePaidStatus,
             refetch
         },
         queryState: {
