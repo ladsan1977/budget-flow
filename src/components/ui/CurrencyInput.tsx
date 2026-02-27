@@ -8,6 +8,8 @@ export interface CurrencyInputProps
     value: number;
     /** Called with the new numeric value whenever the user edits the input. */
     onChange: (value: number) => void;
+    /** Optional class name to customize the currency prefix glyph */
+    prefixClassName?: string;
 }
 
 /**
@@ -18,7 +20,7 @@ export interface CurrencyInputProps
  * - Formats the display value using Intl.NumberFormat when the field is blurred
  */
 const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
-    ({ className, value, onChange, onFocus, onBlur, ...props }, ref) => {
+    ({ className, prefixClassName, value, onChange, onFocus, onBlur, ...props }, ref) => {
         const formatter = new Intl.NumberFormat(DEFAULT_LOCALE, {
             style: 'decimal',
             minimumFractionDigits: 2,
@@ -32,11 +34,11 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
         // Keep rawValue in sync if the parent updates value externally.
         React.useEffect(() => {
             if (!isFocused) {
-                setRawValue(value.toString());
+                setRawValue(Math.max(0, value).toString());
             }
         }, [value, isFocused]);
 
-        const displayValue = isFocused ? rawValue : formatter.format(value);
+        const displayValue = isFocused ? rawValue : formatter.format(Math.max(0, value));
 
         const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
             setIsFocused(true);
@@ -49,7 +51,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
             setIsFocused(false);
             // Commit the parsed value to parent
             const parsed = parseFloat(rawValue.replace(/[^0-9.]/g, ''));
-            const final = isNaN(parsed) ? 0 : parsed;
+            const final = Math.max(0, isNaN(parsed) ? 0 : parsed);
             onChange(final);
             setRawValue(final.toString());
             onBlur?.(e);
@@ -63,7 +65,7 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
             // Fire onChange on every keystroke so parent state stays in sync
             const parsed = parseFloat(cleaned);
             if (!isNaN(parsed)) {
-                onChange(parsed);
+                onChange(Math.max(0, parsed));
             }
         };
 
@@ -71,7 +73,10 @@ const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputProps>(
             <div className="relative flex items-center">
                 {/* Currency prefix glyph */}
                 <span
-                    className="pointer-events-none absolute left-3 select-none text-slate-400 dark:text-slate-500 text-sm font-medium"
+                    className={cn(
+                        "pointer-events-none absolute left-3 select-none text-slate-400 dark:text-slate-500 text-sm font-medium",
+                        prefixClassName
+                    )}
                     aria-hidden="true"
                 >
                     {new Intl.NumberFormat(DEFAULT_LOCALE, { style: 'currency', currency: DEFAULT_CURRENCY, minimumFractionDigits: 0, maximumFractionDigits: 0 })

@@ -13,6 +13,7 @@ import * as LucideIcons from 'lucide-react';
 import { resolveColor } from '../../lib/colors';
 import { ModalHeaderActions } from '../common/ModalHeaderActions';
 import { CategoryFormModal } from '../categories/CategoryFormModal';
+import { CurrencyInput } from '../ui/CurrencyInput';
 import { toast } from 'sonner';
 
 export interface TransactionModalProps {
@@ -142,17 +143,14 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                         {/* Amount Input */}
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-500">Amount</label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-bold text-slate-400">$</span>
-                                <input
-                                    type="number"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                    placeholder="0.00"
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 pl-8 text-2xl font-bold text-slate-900 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
-                                    autoFocus
-                                />
-                            </div>
+                            <CurrencyInput
+                                value={parseFloat(amount) || 0}
+                                onChange={(val) => setAmount(val === 0 ? '' : val.toString())}
+                                placeholder="0.00"
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 pl-10 text-2xl font-bold text-slate-900 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
+                                prefixClassName="left-4 text-xl font-bold text-slate-400"
+                                autoFocus
+                            />
                         </div>
 
                         <div className="grid gap-6 sm:grid-cols-2">
