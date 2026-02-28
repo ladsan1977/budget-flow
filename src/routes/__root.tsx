@@ -13,6 +13,23 @@ export const Route = createRootRoute({
     component: RootComponent,
 })
 
+/**
+ * Resets scroll to the top on every route change.
+ * The actual scrolling element is #main-scroll-container in Shell.tsx,
+ * not window, so we target it directly.
+ */
+function ScrollToTop() {
+    const { pathname } = useLocation();
+
+    useEffect(() => {
+        document
+            .getElementById('main-scroll-container')
+            ?.scrollTo({ top: 0, behavior: 'instant' });
+    }, [pathname]);
+
+    return null;
+}
+
 function RootComponent() {
     return (
         <ErrorBoundary>
@@ -20,6 +37,7 @@ function RootComponent() {
                 <AuthProvider>
                     <DateProvider>
                         <TransactionModalProvider>
+                            <ScrollToTop />
                             <AuthGuard />
                             <GlobalTransactionModal />
                             <Toaster position="top-right" richColors />

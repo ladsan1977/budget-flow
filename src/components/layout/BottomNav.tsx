@@ -23,14 +23,14 @@ export function BottomNav() {
             isCenterAction: true,
         },
         {
-            to: '/variable-budget',
-            icon: Target,
-            label: 'Budgets',
-        },
-        {
             to: '/fixed-expenses',
             icon: Receipt,
             label: 'Fixed',
+        },
+        {
+            to: '/variable-budget',
+            icon: Target,
+            label: 'Spending',
         },
     ]
 

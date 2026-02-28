@@ -5,7 +5,6 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { Transaction, BudgetGoal } from '../types';
-import { VARIABLE_CATEGORY_ID } from '../lib/constants';
 
 // ─── Pure helper (mirrors src/hooks/useDashboardStats.ts: computeStats) ──────
 function computeStats(transactions: Transaction[], budgets: BudgetGoal[]) {
@@ -33,8 +32,7 @@ function computeStats(transactions: Transaction[], budgets: BudgetGoal[]) {
 
     const actualNetFlow = totalIncome - paidFixedExpenses - paidVariableExpenses;
 
-    const variableBudgetLimit =
-        budgets.find(b => b.categoryId === VARIABLE_CATEGORY_ID)?.amount ?? 0;
+    const variableBudgetLimit = budgets[0]?.amount ?? 0;
 
     const variableBudgetPercent =
         variableBudgetLimit > 0
@@ -73,7 +71,6 @@ const baseTx = {
 };
 
 const budget: BudgetGoal = {
-    categoryId: VARIABLE_CATEGORY_ID,
     amount: 1000,
     month: '2026-02-01',
 };

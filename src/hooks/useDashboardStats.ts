@@ -1,7 +1,6 @@
 import { useQueries } from '@tanstack/react-query';
 import { fetchTransactionsByMonth } from '../services/transactions.service';
 import { fetchBudgets } from '../services/budgets.service';
-import { VARIABLE_CATEGORY_ID } from '../lib/constants';
 import type { DashboardStats } from '../types';
 import type { Transaction, BudgetGoal } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -39,8 +38,7 @@ function computeStats(
 
     const actualNetFlow = totalIncome - paidFixedExpenses - paidVariableExpenses;
 
-    const variableBudgetLimit =
-        budgets.find(b => b.categoryId === VARIABLE_CATEGORY_ID)?.amount ?? 0;
+    const variableBudgetLimit = budgets[0]?.amount ?? 0;
 
     const variableBudgetPercent =
         variableBudgetLimit > 0

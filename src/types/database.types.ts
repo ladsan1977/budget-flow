@@ -102,7 +102,6 @@ export interface Database {
                     created_at: string
                     updated_at: string
                     user_id: string
-                    category_id: string
                     limit_amount: number
                     month_year: string
                 }
@@ -111,7 +110,6 @@ export interface Database {
                     created_at?: string
                     updated_at?: string
                     user_id: string
-                    category_id: string
                     limit_amount: number
                     month_year: string
                 }
@@ -120,18 +118,10 @@ export interface Database {
                     created_at?: string
                     updated_at?: string
                     user_id?: string
-                    category_id?: string
                     limit_amount?: number
                     month_year?: string
                 }
                 Relationships: [
-                    {
-                        foreignKeyName: "budgets_category_id_fkey"
-                        columns: ["category_id"]
-                        isOneToOne: false
-                        referencedRelation: "categories"
-                        referencedColumns: ["id"]
-                    },
                     {
                         foreignKeyName: "budgets_user_id_fkey"
                         columns: ["user_id"]

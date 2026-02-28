@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchBudgets } from '../services/budgets.service';
 import type { BudgetGoal } from '../types';
-import { VARIABLE_CATEGORY_ID } from '../lib/constants';
 import { useAuth } from '../context/AuthContext';
 
 export function useBudgets(date?: Date) {
@@ -18,14 +17,13 @@ export function useBudgets(date?: Date) {
 }
 
 /**
- * Helper to get total variable budget limit for a specific month
+ * Helper to get the monthly variable budget limit for a specific month.
+ * Since there is exactly one budget row per user per month, we just grab the first.
  */
 export function useVariableBudgetLimit(date: Date) {
     const { data: budgets = [], ...rest } = useBudgets(date);
 
-    // Logic updated to find the specific 'Groceries' budget which acts as the global variable limit
-    const variableLimit = budgets
-        .find(b => b.categoryId === VARIABLE_CATEGORY_ID)?.amount || 0;
+    const variableLimit = budgets[0]?.amount || 0;
 
     return {
         ...rest,

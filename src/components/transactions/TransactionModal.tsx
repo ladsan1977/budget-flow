@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, CardTitle } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { useCategories } from '../../hooks/useCategories';
@@ -43,6 +43,9 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
     const [isCreateCategoryOpen, setIsCreateCategoryOpen] = useState(false);
     const [createCategoryInitialName, setCreateCategoryInitialName] = useState('');
 
+    // Ref to the underlying <input> inside CurrencyInput so we can select-all on open
+    const amountInputRef = useRef<HTMLInputElement>(null);
+
     // Initial Date Logic
     useEffect(() => {
         if (isOpen) {
@@ -77,6 +80,20 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
             setIsPaid(false);
         }
     }, [isOpen, currentDate, initialType, initialData]);
+
+    // When adding a new transaction, auto-focus the amount field so the user
+    // can start typing immediately without having to backspace the default "0.00".
+    // We skip this for edits — the field already shows the pre-filled amount.
+    useEffect(() => {
+        if (isOpen && !initialData) {
+            // rAF lets the modal finish its CSS animation before we steal focus
+            const id = requestAnimationFrame(() => {
+                amountInputRef.current?.focus();
+                amountInputRef.current?.select();
+            });
+            return () => cancelAnimationFrame(id);
+        }
+    }, [isOpen, initialData]);
 
     if (!isOpen) return null;
 
@@ -151,12 +168,12 @@ export function TransactionModal({ isOpen, onClose, initialType = 'variable', lo
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-500">Amount</label>
                             <CurrencyInput
+                                ref={amountInputRef}
                                 value={parseFloat(amount) || 0}
                                 onChange={(val) => setAmount(val === 0 ? '' : val.toString())}
                                 placeholder="0.00"
                                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 pl-10 text-2xl font-bold text-slate-900 outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
                                 prefixClassName="left-4 text-xl font-bold text-slate-400"
-                                autoFocus
                             />
                         </div>
 

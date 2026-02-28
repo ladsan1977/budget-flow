@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
 
 const router = createRouter({
   routeTree,
-  scrollRestoration: true,
+  scrollRestoration: false,
 })
 
 declare module '@tanstack/react-router' {

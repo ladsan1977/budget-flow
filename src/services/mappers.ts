@@ -40,7 +40,6 @@ export const mapTransaction = (row: TransactionRow): Transaction => ({
  */
 export const mapBudget = (row: BudgetRow): BudgetGoal => ({
     id: row.id,
-    categoryId: row.category_id,
     amount: row.limit_amount,
     month: row.month_year,
     userId: row.user_id,

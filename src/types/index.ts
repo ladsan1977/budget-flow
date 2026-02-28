@@ -33,12 +33,11 @@ export interface Transaction {
 }
 
 /**
- * BudgetGoal defines the "Meta" for a specific category.
- * Used primarily for Variable Expenses.
+ * BudgetGoal represents the monthly spending goal for variable expenses.
+ * One record per user per month.
  */
 export interface BudgetGoal {
     id?: string;         // Supabase UUID
-    categoryId: string;
     amount: number;      // limit_amount
     month: string;       // month_year (YYYY-MM-DD or YYYY-MM)
     userId?: string;     // Supabase user_id

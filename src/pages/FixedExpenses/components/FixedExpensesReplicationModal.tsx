@@ -36,13 +36,13 @@ export function FixedExpensesReplicationModal({
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-50 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
             <div
                 className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
                 onClick={() => !isPending && onOpenChange(false)}
             />
 
-            <Card className="relative w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+            <Card className="fixed top-10 bottom-24 left-4 right-4 sm:relative sm:top-auto sm:bottom-auto sm:left-auto sm:right-auto sm:w-full sm:max-w-2xl transform overflow-hidden rounded-2xl bg-white p-0 shadow-2xl transition-all dark:bg-brand-surface animate-in fade-in zoom-in-95 duration-200 sm:max-h-[90vh] flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 p-6 dark:border-slate-800">
                     <div>
                         <CardTitle>Review & Replicate</CardTitle>
@@ -61,13 +61,13 @@ export function FixedExpensesReplicationModal({
                     </Button>
                 </CardHeader>
 
-                <div className="p-0 overflow-y-auto flex-1">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50 text-slate-500 dark:bg-slate-900/50 dark:text-slate-400 sticky top-0">
+                <div className="flex-1 overflow-y-auto">
+                    <table className="w-full text-sm text-left border-separate border-spacing-0">
+                        <thead className="bg-slate-50 text-slate-500 dark:bg-slate-900/50 dark:text-slate-400 sticky top-0 z-10">
                             <tr>
-                                <th className="px-6 py-3 font-medium">Description</th>
-                                <th className="px-6 py-3 font-medium">Amount</th>
-                                <th className="px-6 py-3 font-medium w-10"></th>
+                                <th className="px-6 py-3 font-medium border-b border-slate-100 dark:border-slate-800">Description</th>
+                                <th className="px-6 py-3 font-medium border-b border-slate-100 dark:border-slate-800">Amount</th>
+                                <th className="px-6 py-3 font-medium border-b border-slate-100 dark:border-slate-800 w-10"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
