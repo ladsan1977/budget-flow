@@ -50,7 +50,7 @@ function computeStats(
     const projectedNetFlow = totalIncome - totalFixedBudget - variableBudgetLimit;
 
     const pendingFixedExpenses = totalFixedBudget - paidFixedExpenses;
-    const pendingVariableExpenses = Math.max(0, variableBudgetLimit - paidVariableExpenses);
+    const pendingVariableExpenses = totalVariableExpenses - paidVariableExpenses;
 
     return {
         totalTransactions: transactions.length,
