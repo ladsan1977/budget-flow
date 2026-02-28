@@ -63,7 +63,7 @@ export function FixedExpensesReplicationModal({
 
                 <div className="flex-1 overflow-y-auto">
                     <table className="w-full text-sm text-left border-separate border-spacing-0">
-                        <thead className="bg-slate-50 text-slate-500 dark:bg-slate-900/50 dark:text-slate-400 sticky top-0 z-10">
+                        <thead className="bg-slate-50 text-slate-500 dark:bg-slate-800 dark:text-slate-400 sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-3 font-medium border-b border-slate-100 dark:border-slate-800">Description</th>
                                 <th className="px-6 py-3 font-medium border-b border-slate-100 dark:border-slate-800">Amount</th>
