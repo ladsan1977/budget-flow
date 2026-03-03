@@ -6,30 +6,45 @@
  * 'fixed': Regular monthly costs (Rent, Credit Cards, etc).
  * 'variable': Goals-based expenses (Groceries, Dining out).
  */
-export type TransactionType = 'income' | 'fixed' | 'variable';
+export type TransactionType = 'income' | 'expense' | 'transfer';
+export type ExpenseNature = 'fixed' | 'variable';
+export type AccountType = 'bank' | 'cash';
+
+export interface Account {
+    id: string;
+    name: string;
+    type: AccountType;
+    userId: string;
+    createdAt: string;
+}
 
 export interface Category {
     id: string;
-    name: string;        // e.g., "DaviBank", "Rent", "Groceries"
-    type: TransactionType;
-    icon?: string;       // Lucide icon name
-    color?: string;      // Tailwind color class or Hex
-    userId?: string;     // Supabase user_id
-    createdAt?: string;  // Supabase timestamp
-    updatedAt?: string;  // Supabase timestamp
+    name: string;
+    type: 'income' | 'expense'; // Refactorizado
+    icon?: string;
+    color?: string;
+    userId: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export interface Transaction {
     id: string;
     amount: number;
     date: string;
-    description: string;
-    categoryId: string;  // Reference to Category.id
+    description: string | null;
+    categoryId?: string;
+    accountId: string;      // Cuenta origen (obligatoria)
+    toAccountId?: string;   // Cuenta destino (solo transfers)
+    account?: Account;
+    toAccount?: Account;
     type: TransactionType;
-    isPaid: boolean;     // Crucial for the 'Fixed Expenses' checklist
-    userId?: string;     // Supabase user_id
-    createdAt?: string;  // Supabase timestamp
-    updatedAt?: string;  // Supabase timestamp
+    expenseNature?: ExpenseNature; // Solo si type === 'expense'
+    isPaid: boolean;
+    userId: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 /**

@@ -28,6 +28,7 @@ export const fetchCategories = async (): Promise<Category[]> => {
 
 /**
  * Create a new category
+ * Note: category.type is now strictly 'income' | 'expense'
  */
 export const createCategory = async (
     category: Omit<Category, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
@@ -99,8 +100,9 @@ export const deleteCategory = async (id: string): Promise<void> => {
         .eq('user_id', userId);
 
     if (error) {
+        // Error foreign key violation
         if (error.code === '23503') {
-            throw new Error('Cannot delete this category because it is still being used by one or more transactions.');
+            throw new Error('Esta categoría no se puede eliminar porque tiene transacciones asociadas.');
         }
         handleSupabaseError(error, 'Failed to delete category');
     }
