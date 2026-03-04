@@ -38,6 +38,7 @@ export const createCategory = async (
     const payload: CategoryInsert = {
         id: crypto.randomUUID(),
         name: category.name,
+        description: category.description || null,
         type: category.type,
         icon: category.icon || null,
         color: category.color || null,
@@ -68,6 +69,7 @@ export const updateCategory = async (
 
     const updateData: CategoryUpdate = {};
     if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.description !== undefined) updateData.description = updates.description || null;
     if (updates.type !== undefined) updateData.type = updates.type;
     if (updates.icon !== undefined) updateData.icon = updates.icon || null;
     if (updates.color !== undefined) updateData.color = updates.color || null;

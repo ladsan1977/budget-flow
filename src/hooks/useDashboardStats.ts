@@ -14,55 +14,79 @@ function computeStats(
     transactions: Transaction[],
     budgets: BudgetGoal[]
 ): DashboardStats {
-    const totalIncome = transactions
-        .filter(tx => tx.type === 'income')
-        .reduce((sum, tx) => sum + tx.amount, 0);
+    const sumByObj = (txs: Transaction[]) => {
+        return txs.reduce(
+            (acc, tx) => {
+                acc.total += tx.amount;
+                if (tx.account?.type === 'bank') acc.bank += tx.amount;
+                else if (tx.account?.type === 'cash') acc.cash += tx.amount;
+                return acc;
+            },
+            { total: 0, bank: 0, cash: 0 }
+        );
+    };
 
-    const totalFixedExpenses = transactions
-        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'fixed')
-        .reduce((sum, tx) => sum + tx.amount, 0);
+    const incomeTxs = transactions.filter(tx => tx.type === 'income');
+    const incomeStats = sumByObj(incomeTxs);
 
-    const totalVariableExpenses = transactions
-        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'variable')
-        .reduce((sum, tx) => sum + tx.amount, 0);
+    const paidIncomeTxs = transactions.filter(tx => tx.type === 'income' && tx.isPaid);
+    const paidIncomeStats = sumByObj(paidIncomeTxs);
 
-    const paidFixedExpenses = transactions
-        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'fixed' && tx.isPaid)
-        .reduce((sum, tx) => sum + tx.amount, 0);
+    const fixedTxs = transactions.filter(tx => tx.type === 'expense' && tx.expenseNature === 'fixed');
+    const fixedStats = sumByObj(fixedTxs);
 
-    const paidVariableExpenses = transactions
-        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'variable' && tx.isPaid)
-        .reduce((sum, tx) => sum + tx.amount, 0);
+    const variableTxs = transactions.filter(tx => tx.type === 'expense' && tx.expenseNature === 'variable');
+    const variableStats = sumByObj(variableTxs);
 
-    const netFlow = totalIncome - totalFixedExpenses - totalVariableExpenses;
+    const paidFixedTxs = transactions.filter(tx => tx.type === 'expense' && tx.expenseNature === 'fixed' && tx.isPaid);
+    const paidFixedStats = sumByObj(paidFixedTxs);
 
-    const actualNetFlow = totalIncome - paidFixedExpenses - paidVariableExpenses;
+    const paidVariableTxs = transactions.filter(tx => tx.type === 'expense' && tx.expenseNature === 'variable' && tx.isPaid);
+    const paidVariableStats = sumByObj(paidVariableTxs);
+
+    const netFlow = incomeStats.total - fixedStats.total - variableStats.total;
+
+    // Current Net Flow = Income Paid - Expenses Paid
+    const actualNetFlow = paidIncomeStats.total - paidFixedStats.total - paidVariableStats.total;
+    const actualNetFlowBank = paidIncomeStats.bank - paidFixedStats.bank - paidVariableStats.bank;
+    const actualNetFlowCash = paidIncomeStats.cash - paidFixedStats.cash - paidVariableStats.cash;
 
     const variableBudgetLimit = budgets[0]?.amount ?? 0;
 
     const variableBudgetPercent =
         variableBudgetLimit > 0
-            ? (totalVariableExpenses / variableBudgetLimit) * 100
+            ? (variableStats.total / variableBudgetLimit) * 100
             : 0;
 
-    // Use total budget/obligations for calculating projected and pending flows
-    const totalFixedBudget = totalFixedExpenses; // Assuming total fixed expenses IS the full obligation for the month based on the requirements context. If not, this needs clarifying.
-    const projectedNetFlow = totalIncome - totalFixedBudget - variableBudgetLimit;
+    // Projected net flow = All Incomes - All Expenses (Paid and Pending)
+    const projectedNetFlow = incomeStats.total - fixedStats.total - variableStats.total;
+    const projectedNetFlowBank = incomeStats.bank - fixedStats.bank - variableStats.bank;
+    const projectedNetFlowCash = incomeStats.cash - fixedStats.cash - variableStats.cash;
 
-    const pendingFixedExpenses = totalFixedBudget - paidFixedExpenses;
-    const pendingVariableExpenses = totalVariableExpenses - paidVariableExpenses;
+    const pendingFixedExpenses = fixedStats.total - paidFixedStats.total;
+    const pendingVariableExpenses = variableStats.total - paidVariableStats.total;
 
     return {
         totalTransactions: transactions.length,
-        totalIncome,
-        totalFixedExpenses,
-        totalVariableExpenses,
+        totalIncome: incomeStats.total,
+        totalIncomeBank: incomeStats.bank,
+        totalIncomeCash: incomeStats.cash,
+        totalFixedExpenses: fixedStats.total,
+        totalFixedExpensesBank: fixedStats.bank,
+        totalFixedExpensesCash: fixedStats.cash,
+        totalVariableExpenses: variableStats.total,
+        totalVariableExpensesBank: variableStats.bank,
+        totalVariableExpensesCash: variableStats.cash,
         netFlow,
         actualNetFlow,
+        actualNetFlowBank,
+        actualNetFlowCash,
         projectedNetFlow,
-        paidFixedExpenses,
+        projectedNetFlowBank,
+        projectedNetFlowCash,
+        paidFixedExpenses: paidFixedStats.total,
         pendingFixedExpenses,
-        paidVariableExpenses,
+        paidVariableExpenses: paidVariableStats.total,
         pendingVariableExpenses,
         variableBudgetLimit,
         variableBudgetPercent,

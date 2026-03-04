@@ -54,6 +54,8 @@ export interface Database {
                     type: 'income' | 'expense' // Actualizado
                     icon: string | null
                     color: string | null
+                    description?: string | null
+
                     user_id: string
                     created_at: string
                     updated_at: string
@@ -64,6 +66,8 @@ export interface Database {
                     type: 'income' | 'expense' // Actualizado
                     icon?: string | null
                     color?: string | null
+                    description?: string | null
+
                     user_id: string
                     created_at?: string
                     updated_at?: string
@@ -74,6 +78,8 @@ export interface Database {
                     type?: 'income' | 'expense' // Actualizado
                     icon?: string | null
                     color?: string | null
+                    description?: string | null
+
                     user_id?: string
                     created_at?: string
                     updated_at?: string

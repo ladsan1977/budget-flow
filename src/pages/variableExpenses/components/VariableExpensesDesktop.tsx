@@ -17,7 +17,7 @@ export function VariableExpensesDesktop({ data, stats, state, actions, modals }:
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Dayly Budget
+                        Monthly Variable Spending Goal
                     </h1>
                     <p className="text-slate-500 dark:text-slate-400 mt-1">
                         Track your discretionary spending against a global monthly goal.

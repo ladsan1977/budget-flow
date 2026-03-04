@@ -18,7 +18,7 @@ export function VariableExpensesMobile({ data, stats, state, actions, modals }: 
             <div className="sticky top-16 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                        Daily Budget
+                        Monthly Goal
                     </h1>
                     <div className="flex items-center gap-2">
                         <Button onClick={() => modals.setIsAddModalOpen(true)} variant="outline" size="sm" className="shadow-lg shadow-brand-primary/20 shrink-0 gap-2 h-10 px-3 flex">

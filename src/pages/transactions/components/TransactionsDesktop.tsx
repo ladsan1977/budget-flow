@@ -54,7 +54,7 @@ export function TransactionsDesktop({
             <Card className="flex overflow-hidden border-slate-200 shadow-sm dark:border-slate-800 dark:bg-brand-surface flex-col max-h-[600px]">
                 <div className="overflow-y-auto flex-1">
                     <table className="w-full text-sm text-left">
-                        <thead className="bg-slate-50 text-slate-500 dark:bg-slate-900/50 dark:text-slate-400 sticky top-0 z-10">
+                        <thead className="bg-slate-50 text-slate-500 dark:bg-slate-900 dark:text-slate-400 sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-4 font-medium">Date</th>
                                 <th className="px-6 py-4 font-medium">Description</th>

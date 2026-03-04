@@ -6,7 +6,7 @@ interface MobileDataCardProps {
     icon: ReactNode;
     categoryName: string;
     date?: string;
-    description: string;
+    description: string | ReactNode;
     amount?: number;
     isIncome?: boolean;
     statusNode?: ReactNode;
@@ -29,11 +29,11 @@ export function MobileDataCard({
         <Card className="p-4 flex flex-col gap-3 md:hidden">
             {/* Top Row: Category Icon + Name (left), Date (right) */}
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 overflow-hidden">
-                    <div className="h-6 w-6 rounded-full flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-3 text-slate-800 dark:text-slate-200 overflow-hidden">
+                    <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0">
                         {icon}
                     </div>
-                    <span className="font-medium truncate">{categoryName}</span>
+                    <span className="font-bold text-base truncate">{categoryName}</span>
                     {typeNode && <span className="ml-1 shrink-0">{typeNode}</span>}
                 </div>
                 {date && (
@@ -45,7 +45,7 @@ export function MobileDataCard({
 
             {/* Middle Row: Description */}
             <div className="flex items-start justify-between">
-                <div className="text-base font-bold text-slate-900 dark:text-slate-100 line-clamp-2">
+                <div className="text-base text-slate-900 dark:text-slate-100">
                     {description}
                 </div>
             </div>

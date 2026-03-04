@@ -18,6 +18,7 @@ export interface CategoryFormProps {
 
 export function CategoryForm({ id, initialData, onSubmit, onCancel, isLoading }: CategoryFormProps) {
     const [name, setName] = useState(initialData?.name || '');
+    const [description, setDescription] = useState(initialData?.description || '');
     const [type, setType] = useState<Category['type']>(initialData?.type || 'expense');
     const [icon, setIcon] = useState(initialData?.icon || getRandomItem(PRESET_ICONS));
     const [color, setColor] = useState(initialData?.color || getRandomItem(PRESET_COLORS));
@@ -25,7 +26,7 @@ export function CategoryForm({ id, initialData, onSubmit, onCancel, isLoading }:
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!name) return;
-        onSubmit({ name, type, icon, color });
+        onSubmit({ name, description, type, icon, color });
     };
 
     return (
@@ -41,6 +42,17 @@ export function CategoryForm({ id, initialData, onSubmit, onCancel, isLoading }:
                         className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
                         autoFocus
                         required
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-500">Description (Optional)</label>
+                    <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="A short description of this category"
+                        className="w-full rounded-xl border border-slate-200 p-4 text-sm outline-none focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100"
+                        rows={2}
                     />
                 </div>
 

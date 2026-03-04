@@ -51,7 +51,6 @@ export function FlowCompositionCard({
                     <div className="flex justify-between text-sm">
                         <span className="font-medium text-slate-900 dark:text-slate-100">Income</span>
                         <div className="flex items-center gap-2">
-                            <span className="text-slate-500">100%</span>
                             <span className="font-semibold">{formatCurrency(totalIncome)}</span>
                         </div>
                     </div>
@@ -65,7 +64,6 @@ export function FlowCompositionCard({
                     <div className="flex justify-between text-sm">
                         <span className="font-medium text-slate-900 dark:text-slate-100">Fixed Expenses</span>
                         <div className="flex items-center gap-2">
-                            <span className="text-slate-500">{totalFixedPct.toFixed(1)}%</span>
                             <span className="font-semibold">{formatCurrency(totalFixed)}</span>
                         </div>
                     </div>
@@ -83,7 +81,6 @@ export function FlowCompositionCard({
                     <div className="flex justify-between text-sm">
                         <span className="font-medium text-slate-900 dark:text-slate-100">Daily Spending</span>
                         <div className="flex items-center gap-2">
-                            <span className="text-slate-500">{totalVarPct.toFixed(1)}%</span>
                             <span className="font-semibold">{formatCurrency(totalVar)}</span>
                         </div>
                     </div>

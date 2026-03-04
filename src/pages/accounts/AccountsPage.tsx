@@ -29,7 +29,7 @@ export default function AccountsPage() {
                     // Spacing
                     "-m-4 sm:-m-6 p-4 sm:p-6 pb-4 md:m-0 md:p-0",
                     // Background & Borders
-                    "bg-slate-50/90 backdrop-blur-md md:bg-transparent md:backdrop-blur-none",
+                    "bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md md:bg-transparent md:dark:bg-transparent md:backdrop-blur-none",
                     "border-b border-slate-200/50 dark:border-slate-800/50 md:border-none"
                 )}
             >

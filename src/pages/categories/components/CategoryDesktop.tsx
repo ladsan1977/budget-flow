@@ -59,8 +59,13 @@ export function CategoryDesktop({ categories, onEdit, onDelete }: CategoryDeskto
                                             >
                                                 <IconComponent className="h-5 w-5" />
                                             </div>
-                                            <div className="font-semibold text-slate-900 dark:text-slate-100">
+                                            <div className="font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                                                 {category.name}
+                                                {category.description && (
+                                                    <span title={category.description} className="text-slate-400 hover:text-slate-600 cursor-pointer">
+                                                        <LucideIcons.Info className="h-4 w-4" />
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     </td>

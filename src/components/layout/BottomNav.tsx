@@ -30,7 +30,7 @@ export function BottomNav() {
         {
             to: '/variable-budget',
             icon: Target,
-            label: 'Spending',
+            label: 'Goal',
         },
     ]
 

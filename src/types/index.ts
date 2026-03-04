@@ -22,6 +22,7 @@ export interface Account {
 export interface Category {
     id: string;
     name: string;
+    description?: string;
     type: 'income' | 'expense'; // Refactorizado
     icon?: string;
     color?: string;
@@ -68,11 +69,21 @@ export interface BudgetGoal {
 export interface DashboardStats {
     totalTransactions: number;
     totalIncome: number;
+    totalIncomeBank: number;
+    totalIncomeCash: number;
     totalFixedExpenses: number;
+    totalFixedExpensesBank: number;
+    totalFixedExpensesCash: number;
     totalVariableExpenses: number;
+    totalVariableExpensesBank: number;
+    totalVariableExpensesCash: number;
     netFlow: number;
     actualNetFlow: number;
+    actualNetFlowBank: number;
+    actualNetFlowCash: number;
     projectedNetFlow: number;
+    projectedNetFlowBank: number;
+    projectedNetFlowCash: number;
     paidFixedExpenses: number;
     pendingFixedExpenses: number;
     paidVariableExpenses: number;

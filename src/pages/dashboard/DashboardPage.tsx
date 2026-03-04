@@ -9,7 +9,7 @@ export default function DashboardPage() {
     const {
         stats,
         isEmptyState,
-        incomeMomChange,
+
         variableBreakdown,
         overallBudgetUsagePercentage,
         gaugeColor,
@@ -38,7 +38,7 @@ export default function DashboardPage() {
     const viewProps = {
         stats,
         isEmptyState,
-        incomeMomChange,
+
         variableBreakdown,
         overallBudgetUsagePercentage,
         gaugeColor,

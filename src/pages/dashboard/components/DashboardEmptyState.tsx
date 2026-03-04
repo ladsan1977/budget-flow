@@ -62,7 +62,7 @@ export function DashboardEmptyState() {
                         >
                             monthly spending goal
                         </button>
-                        {' '}to keep your daily budget on track.
+                        {' '}to keep your spending target on track.
                     </p>
                 </div>
             </div>

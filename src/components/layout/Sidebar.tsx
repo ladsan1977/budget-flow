@@ -18,7 +18,7 @@ import { useRouter } from '@tanstack/react-router'
 const navItems = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/fixed-expenses', label: 'Fixed Expenses', icon: Receipt },
-    { to: '/variable-budget', label: 'Daily Budget', icon: Coins },
+    { to: '/variable-budget', label: 'Spending Target', icon: Coins },
     { to: '/transactions', label: 'Transaction History', icon: History },
     { to: '/categories', label: 'Categories', icon: Tags },
     { to: '/accounts', label: 'Accounts', icon: CreditCard },

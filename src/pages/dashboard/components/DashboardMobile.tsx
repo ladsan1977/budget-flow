@@ -15,7 +15,7 @@ type LogicData = ReturnType<typeof useDashboardLogic>;
 interface DashboardMobileProps {
     stats: NonNullable<LogicData['stats']>;
     isEmptyState: boolean;
-    incomeMomChange: LogicData['incomeMomChange'];
+
     variableBreakdown: LogicData['variableBreakdown'];
     overallBudgetUsagePercentage: LogicData['overallBudgetUsagePercentage'];
     gaugeColor: LogicData['gaugeColor'];
@@ -28,7 +28,7 @@ interface DashboardMobileProps {
 export function DashboardMobile({
     stats,
     isEmptyState,
-    incomeMomChange,
+
     variableBreakdown,
     gaugeColor,
     gaugeStroke,
@@ -65,52 +65,49 @@ export function DashboardMobile({
                         <StatCard
                             title="Total Income"
                             amount={stats.totalIncome}
+                            bankAmount={stats.totalIncomeBank}
+                            cashAmount={stats.totalIncomeCash}
                             icon={Wallet}
                             iconColor="text-brand-success"
-                            description={
-                                incomeMomChange !== null && incomeMomChange !== undefined
-                                    ? (
-                                        <span className={`flex items-center gap-1 font-medium ${incomeMomChange > 0 ? 'text-emerald-500 dark:text-emerald-400' :
-                                            incomeMomChange < 0 ? 'text-rose-500 dark:text-rose-400' :
-                                                'text-slate-500 dark:text-slate-400'
-                                            }`}>
-                                            {incomeMomChange > 0 ? '↗ ' : ''}
-                                            {incomeMomChange < 0 ? '↘ ' : ''}
-                                            {Math.abs(incomeMomChange).toFixed(1)}% from last month
-                                        </span>
-                                    )
-                                    : undefined
-                            }
+                            description="Regular incoming cash flow"
                             className="border-brand-success/50 dark:border-brand-success/40"
                         />
                         <StatCard
                             title="Fixed Expenses"
                             amount={stats.totalFixedExpenses}
+                            bankAmount={stats.totalFixedExpensesBank}
+                            cashAmount={stats.totalFixedExpensesCash}
                             icon={CreditCard}
                             iconColor="text-brand-primary"
                             description="Scheduled & Regular"
                             className="border-brand-danger/50 dark:border-brand-danger/40"
                         />
                         <StatCard
-                            title="Daily Budget"
+                            title="Variable Expenses"
                             amount={stats.totalVariableExpenses}
+                            bankAmount={stats.totalVariableExpensesBank}
+                            cashAmount={stats.totalVariableExpensesCash}
                             icon={ShoppingCart}
                             iconColor="text-brand-warning"
-                            description={`${(stats.variableBudgetPercent).toFixed(1)}% of budget`}
+                            description="Discretionary spending"
                             className="border-brand-danger/50 dark:border-brand-danger/40"
                         />
                         <StatCard
                             title="Current Net Flow"
                             amount={stats.actualNetFlow}
+                            bankAmount={stats.actualNetFlowBank}
+                            cashAmount={stats.actualNetFlowCash}
                             icon={DollarSign}
                             iconColor="text-slate-500"
                             amountColor={stats.actualNetFlow >= 0 ? 'text-brand-success' : 'text-brand-danger'}
-                            description="Income - Paid Expenses"
+                            description="Received Income - Paid Expenses"
                             className="border-brand-primary/50 dark:border-brand-primary/40"
                         />
                         <StatCard
                             title="Projected Flow"
                             amount={stats.projectedNetFlow}
+                            bankAmount={stats.projectedNetFlowBank}
+                            cashAmount={stats.projectedNetFlowCash}
                             icon={TrendingUp}
                             iconColor="text-slate-500"
                             amountColor={stats.projectedNetFlow >= 0 ? 'text-brand-success' : 'text-brand-danger'}

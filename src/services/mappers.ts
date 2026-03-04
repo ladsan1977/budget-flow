@@ -25,6 +25,7 @@ export const mapAccount = (row: AccountRow): Account => ({
 export const mapCategory = (row: CategoryRow): Category => ({
     id: row.id,
     name: row.name,
+    description: (row as any).description || undefined,
     type: row.type as 'income' | 'expense',
     icon: row.icon || undefined,
     color: row.color || undefined,

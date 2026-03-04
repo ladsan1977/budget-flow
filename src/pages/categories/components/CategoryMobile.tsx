@@ -51,8 +51,14 @@ export function CategoryMobile({ categories, onEdit, onDelete }: CategoryMobileP
                                 <IconComponent className="h-4 w-4" />
                             </div>
                         }
-                        categoryName="Category"
-                        description={category.name}
+                        categoryName={category.name}
+                        description={
+                            category.description ? (
+                                <span className="text-sm font-normal text-slate-500 dark:text-slate-400 mt-0.5">
+                                    {category.description}
+                                </span>
+                            ) : ""
+                        }
                         statusNode={
                             <Badge variant={getBadgeVariant(category.type)} className="text-[10px] px-2 py-0.5 uppercase">
                                 {category.type}
