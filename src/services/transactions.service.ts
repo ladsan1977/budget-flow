@@ -32,7 +32,8 @@ export const fetchTransactions = async (): Promise<Transaction[]> => {
  */
 export const fetchTransactionsByMonth = async (
     date: Date,
-    type?: Transaction['type']
+    type?: Transaction['type'],
+    expenseNature?: Transaction['expenseNature']
 ): Promise<Transaction[]> => {
     const userId = await requireUser();
     const { startDate, endDate } = getMonthRange(date);
@@ -46,6 +47,9 @@ export const fetchTransactionsByMonth = async (
 
     if (type) {
         query = query.eq('type', type);
+    }
+    if (expenseNature) {
+        query = query.eq('expense_nature', expenseNature);
     }
 
     const { data, error } = await query
@@ -181,23 +185,27 @@ export const createMultipleTransactions = async (
     return (data || []).map(mapTransaction);
 };
 
-/**
- * Bulk delete transactions for a specific month and type
- */
 export const deleteTransactionsByMonthAndType = async (
     date: Date,
-    type: Transaction['type']
+    type: Transaction['type'],
+    expenseNature?: Transaction['expenseNature']
 ): Promise<void> => {
     const userId = await requireUser();
     const { startDate, endDate } = getMonthRange(date);
 
-    const { error } = await supabase
+    let query = supabase
         .from('transactions')
         .delete()
         .eq('user_id', userId)
         .eq('type', type)
         .gte('date', startDate)
         .lt('date', endDate);
+
+    if (expenseNature) {
+        query = query.eq('expense_nature', expenseNature);
+    }
+
+    const { error } = await query;
 
     if (error) {
         handleSupabaseError(error, 'Failed to delete transactions');

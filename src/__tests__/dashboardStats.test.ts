@@ -13,19 +13,19 @@ function computeStats(transactions: Transaction[], budgets: BudgetGoal[]) {
         .reduce((sum, tx) => sum + tx.amount, 0);
 
     const totalFixedExpenses = transactions
-        .filter(tx => tx.type === 'fixed')
+        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'fixed')
         .reduce((sum, tx) => sum + tx.amount, 0);
 
     const totalVariableExpenses = transactions
-        .filter(tx => tx.type === 'variable')
+        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'variable')
         .reduce((sum, tx) => sum + tx.amount, 0);
 
     const paidFixedExpenses = transactions
-        .filter(tx => tx.type === 'fixed' && tx.isPaid)
+        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'fixed' && tx.isPaid)
         .reduce((sum, tx) => sum + tx.amount, 0);
 
     const paidVariableExpenses = transactions
-        .filter(tx => tx.type === 'variable' && tx.isPaid)
+        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'variable' && tx.isPaid)
         .reduce((sum, tx) => sum + tx.amount, 0);
 
     const netFlow = totalIncome - totalFixedExpenses - totalVariableExpenses;
@@ -66,8 +66,11 @@ const baseTx = {
     date: '2026-02-01',
     description: 'test',
     categoryId: 'cat_test',
+    accountId: 'acc_test',
     isPaid: true,
     userId: 'user1',
+    createdAt: '2026-02-01',
+    updatedAt: '2026-02-01',
 };
 
 const budget: BudgetGoal = {
@@ -80,9 +83,9 @@ describe('computeStats', () => {
     it('calculates all fields correctly for a normal month', () => {
         const transactions: Transaction[] = [
             { ...baseTx, id: '1', type: 'income', amount: 5000 },
-            { ...baseTx, id: '2', type: 'fixed', amount: 1500 },
-            { ...baseTx, id: '3', type: 'variable', amount: 400 },
-            { ...baseTx, id: '4', type: 'variable', amount: 100 },
+            { ...baseTx, id: '2', type: 'expense', expenseNature: 'fixed', amount: 1500 },
+            { ...baseTx, id: '3', type: 'expense', expenseNature: 'variable', amount: 400 },
+            { ...baseTx, id: '4', type: 'expense', expenseNature: 'variable', amount: 100 },
         ];
 
         const result = computeStats(transactions, [budget]);
@@ -99,7 +102,7 @@ describe('computeStats', () => {
 
     it('returns variableBudgetPercent = 0 when budget limit is 0 (no division by zero)', () => {
         const transactions: Transaction[] = [
-            { ...baseTx, id: '1', type: 'variable', amount: 200 },
+            { ...baseTx, id: '1', type: 'expense', expenseNature: 'variable', amount: 200 },
         ];
 
         const result = computeStats(transactions, []); // no budget row
@@ -121,7 +124,7 @@ describe('computeStats', () => {
     it('netFlow is negative when expenses exceed income', () => {
         const transactions: Transaction[] = [
             { ...baseTx, id: '1', type: 'income', amount: 100 },
-            { ...baseTx, id: '2', type: 'fixed', amount: 300 },
+            { ...baseTx, id: '2', type: 'expense', expenseNature: 'fixed', amount: 300 },
         ];
 
         const result = computeStats(transactions, []);
@@ -130,7 +133,7 @@ describe('computeStats', () => {
 
     it('variableBudgetPercent can exceed 100 when over budget', () => {
         const transactions: Transaction[] = [
-            { ...baseTx, id: '1', type: 'variable', amount: 1500 },
+            { ...baseTx, id: '1', type: 'expense', expenseNature: 'variable', amount: 1500 },
         ];
 
         const result = computeStats(transactions, [budget]); // limit = 1000

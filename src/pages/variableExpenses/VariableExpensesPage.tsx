@@ -23,7 +23,8 @@ export default function VariableCostsPage() {
             <TransactionModal
                 isOpen={logic.modals.isAddModalOpen}
                 onClose={() => logic.modals.setIsAddModalOpen(false)}
-                initialType="variable"
+                initialType="expense"
+                initialExpenseNature="variable"
                 lockType={true}
             />
         </>

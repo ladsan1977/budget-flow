@@ -22,7 +22,7 @@ export function useVariableExpensesLogic() {
     const { currentDate } = useDate();
 
     // Live data from Supabase (via TanStack Query cache)
-    const { data: variableTransactions = [] } = useTransactionsByMonth('variable');
+    const { data: variableTransactions = [] } = useTransactionsByMonth('expense', 'variable');
     const { data: globalLimit = 0, isLoading: limitLoading } = useVariableBudgetLimit(currentDate);
     const { data: categories = [] } = useCategories();
     const updateBudgetMutation = useUpdateBudget();

@@ -6,11 +6,11 @@ import { Plus, Search, Edit2, X } from 'lucide-react';
 import type { TransactionType } from '../../../types';
 import type { TransactionsLogicReturn } from '../hooks/useTransactionsLogic';
 
-const getBadgeVariant = (txType: TransactionType) => {
-    switch (txType) {
+const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 'variable' }) => {
+    switch (tx.type) {
         case 'income': return 'success';
-        case 'fixed': return 'primary'; // Indigo/Primary
-        case 'variable': return 'warning';
+        case 'expense': return tx.expenseNature === 'fixed' ? 'primary' : 'warning';
+        case 'transfer': return 'outline';
         default: return 'outline';
     }
 };
@@ -83,8 +83,8 @@ export function TransactionsDesktop({
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <Badge variant={getBadgeVariant(tx.type)}>
-                                                {tx.type === 'income' ? 'Income' : tx.type === 'fixed' ? 'Fixed Expenses' : tx.type === 'variable' ? 'Daily Budget' : tx.type}
+                                            <Badge variant={getBadgeVariant(tx)}>
+                                                {tx.type === 'income' ? 'Income' : tx.type === 'expense' ? 'Expense' : 'Transfer'}
                                             </Badge>
                                         </td>
                                         <td className="px-6 py-4">

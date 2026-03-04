@@ -7,6 +7,7 @@ import {
     BarChart3,
     Wallet,
     Tags,
+    CreditCard,
     LogOut,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
@@ -20,6 +21,7 @@ const navItems = [
     { to: '/variable-budget', label: 'Daily Budget', icon: Coins },
     { to: '/transactions', label: 'Transaction History', icon: History },
     { to: '/categories', label: 'Categories', icon: Tags },
+    { to: '/accounts', label: 'Accounts', icon: CreditCard },
     { to: '/reports', label: 'Reports', icon: BarChart3 },
 ]
 

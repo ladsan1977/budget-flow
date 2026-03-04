@@ -19,7 +19,10 @@ export function useTransactions() {
 /**
  * Fetch transactions filtered by month and optionally by type
  */
-export function useTransactionsByMonth(type?: Transaction['type']) {
+export function useTransactionsByMonth(
+    type?: Transaction['type'],
+    expenseNature?: Transaction['expenseNature']
+) {
     const { currentDate } = useDate();
     const { user } = useAuth();
     const date = currentDate;
@@ -27,8 +30,8 @@ export function useTransactionsByMonth(type?: Transaction['type']) {
     const year = date.getFullYear();
 
     return useQuery<Transaction[], Error>({
-        queryKey: ['transactions', 'by-month', year, month, type, user?.id],
-        queryFn: () => fetchTransactionsByMonth(date, type),
+        queryKey: ['transactions', 'by-month', year, month, type, expenseNature, user?.id],
+        queryFn: () => fetchTransactionsByMonth(date, type, expenseNature),
         enabled: !!user,
         staleTime: 1 * 60 * 1000, // 1 minute
     });

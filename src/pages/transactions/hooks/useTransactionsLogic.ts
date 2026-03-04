@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTransactionsByMonth } from '../../../hooks/useTransactions';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDeleteTransaction, useUpdateTransaction } from '../../../hooks/useTransactionMutations';
-import type { Transaction, TransactionType } from '../../../types';
+import type { Transaction } from '../../../types';
 
 export function useTransactionsLogic() {
     const { data: transactions = [], error, refetch, isPending: isQueryPending } = useTransactionsByMonth();
@@ -16,9 +16,14 @@ export function useTransactionsLogic() {
 
     const sortedTransactions = useMemo(() => {
         return [...transactions].sort((a, b) => {
-            // Priority 1: Type (income -> fixed expenses -> variable expenses)
-            const typeOrder: Record<TransactionType, number> = { income: 0, fixed: 1, variable: 2 };
-            const typeDiff = typeOrder[a.type] - typeOrder[b.type];
+            // Priority 1: Type (income -> fixed expenses -> variable expenses -> transfer)
+            const getTypeWeight = (tx: Transaction) => {
+                if (tx.type === 'income') return 0;
+                if (tx.type === 'expense') return tx.expenseNature === 'fixed' ? 1 : 2;
+                if (tx.type === 'transfer') return 3;
+                return 4;
+            };
+            const typeDiff = getTypeWeight(a) - getTypeWeight(b);
             if (typeDiff !== 0) {
                 return typeDiff;
             }

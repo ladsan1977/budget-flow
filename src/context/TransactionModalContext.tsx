@@ -1,13 +1,14 @@
 import { createContext, useContext, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { Transaction, TransactionType } from '../types';
+import type { Transaction, TransactionType, ExpenseNature } from '../types';
 
 interface ModalContextType {
     isOpen: boolean;
     initialType: TransactionType;
+    initialExpenseNature: ExpenseNature | null;
     lockType: boolean;
     initialData: Transaction | null;
-    openModal: (options?: { initialType?: TransactionType; lockType?: boolean; initialData?: Transaction | null }) => void;
+    openModal: (options?: { initialType?: TransactionType; initialExpenseNature?: ExpenseNature | null; lockType?: boolean; initialData?: Transaction | null }) => void;
     closeModal: () => void;
 }
 
@@ -15,12 +16,14 @@ const TransactionModalContext = createContext<ModalContextType | undefined>(unde
 
 export function TransactionModalProvider({ children }: { children: ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
-    const [initialType, setInitialType] = useState<TransactionType>('variable');
+    const [initialType, setInitialType] = useState<TransactionType>('expense');
+    const [initialExpenseNature, setInitialExpenseNature] = useState<ExpenseNature | null>(null);
     const [lockType, setLockType] = useState(false);
     const [initialData, setInitialData] = useState<Transaction | null>(null);
 
-    const openModal = (options?: { initialType?: TransactionType; lockType?: boolean; initialData?: Transaction | null }) => {
-        setInitialType(options?.initialType ?? 'variable');
+    const openModal = (options?: { initialType?: TransactionType; initialExpenseNature?: ExpenseNature | null; lockType?: boolean; initialData?: Transaction | null }) => {
+        setInitialType(options?.initialType ?? 'expense');
+        setInitialExpenseNature(options?.initialExpenseNature ?? null);
         setLockType(options?.lockType ?? false);
         setInitialData(options?.initialData ?? null);
         setIsOpen(true);
@@ -30,10 +33,11 @@ export function TransactionModalProvider({ children }: { children: ReactNode }) 
         setIsOpen(false);
         setInitialData(null);
         setLockType(false);
+        setInitialExpenseNature(null);
     };
 
     return (
-        <TransactionModalContext.Provider value={{ isOpen, initialType, lockType, initialData, openModal, closeModal }}>
+        <TransactionModalContext.Provider value={{ isOpen, initialType, initialExpenseNature, lockType, initialData, openModal, closeModal }}>
             {children}
         </TransactionModalContext.Provider>
     );

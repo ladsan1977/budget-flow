@@ -4,19 +4,19 @@ import { QueryErrorFallback } from '../../components/ui/QueryErrorFallback';
 import { Plus } from 'lucide-react';
 import { ConfirmModal } from '../../components/common/ConfirmModal';
 import { ModalHeaderActions } from '../../components/common/ModalHeaderActions';
-import { useCategoryLogic } from './hooks/useCategoryLogic';
-import { CategoryDesktop } from './components/CategoryDesktop';
-import { CategoryMobile } from './components/CategoryMobile';
-import { CategoryForm } from './components/CategoryForm';
+import { useAccountLogic } from './hooks/useAccountLogic';
+import { AccountDesktop } from './components/AccountDesktop';
+import { AccountMobile } from './components/AccountMobile';
+import { AccountForm } from './components/AccountForm';
 import { useIsMobile } from '../../hooks/ui/useIsMobile';
 import { cn } from '../../lib/utils';
 
-export default function CategoryPage() {
-    const { state, actions } = useCategoryLogic();
+export default function AccountsPage() {
+    const { state, actions } = useAccountLogic();
     const isMobile = useIsMobile();
 
     if (state.error) {
-        return <QueryErrorFallback error={state.error} resetErrorBoundary={actions.refetch} title="Failed to load categories" />;
+        return <QueryErrorFallback error={state.error} resetErrorBoundary={actions.refetch} title="Failed to load accounts" />;
     }
 
     return (
@@ -36,16 +36,16 @@ export default function CategoryPage() {
                 <div className="flex flex-row items-center justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                            Categories
+                            Accounts
                         </h1>
                         <p className="text-slate-500 dark:text-slate-400 hidden md:block">
-                            Manage your incoming and outgoing categories.
+                            Manage your bank and cash accounts.
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
                         <Button onClick={actions.handleOpenCreate} className="gap-2 shadow-lg shadow-brand-primary/20 shrink-0 hidden sm:inline-flex">
                             <Plus className="h-4 w-4" />
-                            <span>Add Category</span>
+                            <span>Add Account</span>
                         </Button>
                         <Button onClick={actions.handleOpenCreate} variant="outline" size="sm" className="shadow-lg shadow-brand-primary/20 sm:hidden shrink-0 gap-2 h-10 px-3">
                             <Plus className="h-4 w-4" />
@@ -56,16 +56,16 @@ export default function CategoryPage() {
             </div>
 
             {state.isLoading ? (
-                <div className="text-slate-500">Loading categories...</div>
+                <div className="text-slate-500">Loading accounts...</div>
             ) : isMobile ? (
-                <CategoryMobile
-                    categories={state.categories}
+                <AccountMobile
+                    accounts={state.accounts}
                     onEdit={actions.handleOpenEdit}
                     onDelete={actions.handleDelete}
                 />
             ) : (
-                <CategoryDesktop
-                    categories={state.categories}
+                <AccountDesktop
+                    accounts={state.accounts}
                     onEdit={actions.handleOpenEdit}
                     onDelete={actions.handleDelete}
                 />
@@ -89,21 +89,21 @@ export default function CategoryPage() {
                     >
                         <CardHeader className="shrink-0 flex flex-row items-center justify-between border-b border-slate-100 p-4 sm:p-6 dark:border-slate-800">
                             <CardTitle className="text-lg md:text-xl font-bold leading-tight text-slate-900 dark:text-slate-100 flex-none">
-                                {state.editingCategory ? 'Edit Category' : 'Add Category'}
+                                {state.editingAccount ? 'Edit Account' : 'Add Account'}
                             </CardTitle>
 
                             <div className="flex items-center gap-2">
                                 <ModalHeaderActions
                                     onCancel={actions.closeFormModal}
-                                    formId="category-form"
+                                    formId="account-form"
                                 />
                             </div>
                         </CardHeader>
                         <div className="flex flex-col sm:overflow-visible overflow-y-auto w-full md:h-auto min-h-0">
                             <div className="p-4 sm:p-6 pb-12 sm:pb-6 space-y-6 flex-1">
-                                <CategoryForm
-                                    id="category-form"
-                                    initialData={state.editingCategory || undefined}
+                                <AccountForm
+                                    id="account-form"
+                                    initialData={state.editingAccount || undefined}
                                     onSubmit={actions.handleSubmit}
                                     onCancel={actions.closeFormModal}
                                     isLoading={state.isSaving}
@@ -116,11 +116,11 @@ export default function CategoryPage() {
 
             {/* Delete Confirmation Modal */}
             <ConfirmModal
-                isOpen={!!state.categoryToDelete}
+                isOpen={!!state.accountToDelete}
                 onClose={actions.closeDeleteModal}
                 onConfirm={actions.confirmDelete}
-                title="Delete Category"
-                message="Are you sure you want to delete this category? This action cannot be undone."
+                title="Delete Account"
+                message="Are you sure you want to delete this account? Transactions associated with this account might prevent deletion."
                 confirmText="Yes, delete"
                 cancelText="Cancel"
                 variant="danger"

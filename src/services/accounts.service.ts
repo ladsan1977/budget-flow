@@ -34,10 +34,19 @@ export const createAccount = async (
 ): Promise<Account> => {
     const userId = await requireUser();
 
+    if (account.isDefault) {
+        await supabase
+            .from('accounts')
+            .update({ is_default: false })
+            .eq('user_id', userId)
+            .eq('is_default', true);
+    }
+
     const payload: AccountInsert = {
         id: crypto.randomUUID(), // Manually generating ID to be consistent with your other services
         name: account.name,
         type: account.type,
+        is_default: account.isDefault || false,
         user_id: userId,
     };
 
@@ -66,6 +75,17 @@ export const updateAccount = async (
     const updateData: AccountUpdate = {};
     if (updates.name !== undefined) updateData.name = updates.name;
     if (updates.type !== undefined) updateData.type = updates.type;
+    if (updates.isDefault !== undefined) {
+        updateData.is_default = updates.isDefault;
+        if (updates.isDefault) {
+            await supabase
+                .from('accounts')
+                .update({ is_default: false })
+                .eq('user_id', userId)
+                .eq('is_default', true)
+                .neq('id', id);
+        }
+    }
 
     const { data, error } = await supabase
         .from('accounts')

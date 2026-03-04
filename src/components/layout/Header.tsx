@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Moon, Sun, Plus, Wallet, Menu, X, Tags, BarChart3, LogOut } from 'lucide-react'
+import { Moon, Sun, Plus, Wallet, Menu, X, Tags, BarChart3, LogOut, CreditCard } from 'lucide-react'
 import { Link, useRouter } from '@tanstack/react-router'
 import { Button } from '../ui/Button'
 import { useTheme } from '../theme-provider'
@@ -22,6 +22,7 @@ export function Header() {
     // Secondary navigation items for mobile drawer
     const mobileDrawerItems = [
         { to: '/categories', label: 'Categories', icon: Tags },
+        { to: '/accounts', label: 'Accounts', icon: CreditCard },
         { to: '/reports', label: 'Reports', icon: BarChart3 },
     ]
 

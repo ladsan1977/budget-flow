@@ -36,13 +36,10 @@ export function MobileCategorySelector({
 
     const filteredCategories = useMemo(() => {
         return categories.filter(cat =>
-            cat.name.toLowerCase().includes(searchQuery.toLowerCase())
+            cat.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+            cat.type === type
         );
-    }, [categories, searchQuery]);
-
-    const incomeCategories = filteredCategories.filter(c => c.type === 'income');
-    const fixedCategories = filteredCategories.filter(c => c.type === 'fixed');
-    const variableCategories = filteredCategories.filter(c => c.type === 'variable');
+    }, [categories, searchQuery, type]);
 
     if (!isOpen) return null;
 
@@ -134,9 +131,7 @@ export function MobileCategorySelector({
 
                 {/* Content */}
                 <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-24 sm:pb-6 pt-5 custom-scrollbar">
-                    {type === 'income' && renderCategoryGroup('Income', incomeCategories)}
-                    {type === 'fixed' && renderCategoryGroup('Fixed Expenses', fixedCategories)}
-                    {type === 'variable' && renderCategoryGroup('Variable Expenses', variableCategories)}
+                    {renderCategoryGroup(type === 'income' ? 'Income' : 'Expense', filteredCategories)}
 
                     {filteredCategories.length === 0 && (
                         <div className="text-center py-10 text-slate-500 dark:text-slate-400">

@@ -85,8 +85,8 @@ export function useBulkDeleteTransactions() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ date, type }: { date: Date; type: Transaction['type'] }) =>
-            deleteTransactionsByMonthAndType(date, type),
+        mutationFn: ({ date, type, expenseNature }: { date: Date; type: Transaction['type']; expenseNature?: Transaction['expenseNature'] }) =>
+            deleteTransactionsByMonthAndType(date, type, expenseNature),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['transactions'] });
             queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });

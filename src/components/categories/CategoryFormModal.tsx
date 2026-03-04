@@ -3,13 +3,13 @@ import { ModalHeaderActions } from '../common/ModalHeaderActions';
 import { CategoryForm } from '../../pages/categories/components/CategoryForm';
 import { useCreateCategory } from '../../hooks/useCategoryMutations';
 import { cn } from '../../lib/utils';
-import type { Category, TransactionType } from '../../types';
+import type { Category } from '../../types';
 
 export interface CategoryFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     initialName?: string;
-    initialType?: TransactionType;
+    initialType?: 'income' | 'expense';
     onSuccess?: (categoryId: string) => void;
 }
 
@@ -21,7 +21,7 @@ export function CategoryFormModal({ isOpen, onClose, initialName, initialType, o
     const handleSubmit = (data: Partial<Category>) => {
         createMutation.mutate({
             name: data.name!,
-            type: data.type || 'variable',
+            type: data.type || 'expense',
             icon: data.icon || undefined,
             color: data.color || undefined,
         }, {

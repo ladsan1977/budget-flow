@@ -4,7 +4,6 @@ import type { Database } from '../types/database.types';
 import type { Category, Transaction, BudgetGoal, Account, TransactionType, ExpenseNature, AccountType } from '../types';
 
 type CategoryRow = Database['public']['Tables']['categories']['Row'];
-type TransactionRow = Database['public']['Tables']['transactions']['Row'];
 type BudgetRow = Database['public']['Tables']['budgets']['Row'];
 type AccountRow = Database['public']['Tables']['accounts']['Row'];
 
@@ -15,6 +14,7 @@ export const mapAccount = (row: AccountRow): Account => ({
     id: row.id,
     name: row.name,
     type: row.type as AccountType,
+    isDefault: row.is_default || false,
     userId: row.user_id,
     createdAt: row.created_at,
 });

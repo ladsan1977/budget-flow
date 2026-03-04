@@ -13,7 +13,7 @@ export function useFixedExpensesLogic() {
     const { currentDate, monthName, year } = useDate();
     const { user } = useAuth();
 
-    const { data: transactions = [], error, isLoading } = useTransactionsByMonth('fixed');
+    const { data: transactions = [], error, isLoading } = useTransactionsByMonth('expense', 'fixed');
     const { data: categories = [] } = useCategories();
 
     const prevMonthDate = useMemo(() => {
@@ -21,8 +21,8 @@ export function useFixedExpensesLogic() {
     }, [currentDate]);
 
     const { data: prevMonthTransactions = [] } = useQuery<Transaction[], Error>({
-        queryKey: ['transactions', 'by-month', prevMonthDate.getFullYear(), prevMonthDate.getMonth() + 1, 'fixed', user?.id],
-        queryFn: () => fetchTransactionsByMonth(prevMonthDate, 'fixed'),
+        queryKey: ['transactions', 'by-month', prevMonthDate.getFullYear(), prevMonthDate.getMonth() + 1, 'expense', 'fixed', user?.id],
+        queryFn: () => fetchTransactionsByMonth(prevMonthDate, 'expense', 'fixed'),
         enabled: !!user,
         staleTime: 1 * 60 * 1000,
     });
@@ -111,7 +111,7 @@ export function useFixedExpensesLogic() {
         const prevMonthDateForReplicate = new Date(currentYear, currentMonth - 2, 1);
 
         try {
-            const prevMonthTxs = await fetchTransactionsByMonth(prevMonthDateForReplicate, 'fixed');
+            const prevMonthTxs = await fetchTransactionsByMonth(prevMonthDateForReplicate, 'expense', 'fixed');
 
             if (prevMonthTxs.length === 0) {
                 setInfoMessage(`There are no fixed expenses registered for the previous month to clone.`);
@@ -143,7 +143,7 @@ export function useFixedExpensesLogic() {
         setIsConfirmModalOpen(false);
 
         if (currentMonthFixedExpenses.length > 0) {
-            await bulkDeleteMutation.mutateAsync({ date: currentDate, type: 'fixed' });
+            await bulkDeleteMutation.mutateAsync({ date: currentDate, type: 'expense', expenseNature: 'fixed' });
         }
 
         const payloads = draftTransactions.map(tx => ({
@@ -151,7 +151,10 @@ export function useFixedExpensesLogic() {
             amount: tx.amount,
             date: tx.date,
             categoryId: tx.categoryId,
-            type: 'fixed' as const,
+            type: 'expense' as const,
+            expenseNature: 'fixed' as const,
+            accountId: tx.accountId,
+            toAccountId: tx.toAccountId,
             isPaid: false,
         }));
 

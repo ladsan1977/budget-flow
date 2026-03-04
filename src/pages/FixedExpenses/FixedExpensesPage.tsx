@@ -65,7 +65,8 @@ export default function FixedExpensesPage() {
                     setIsAddModalOpen(false);
                     setEditingTransaction(null);
                 }}
-                initialType="fixed"
+                initialType="expense"
+                initialExpenseNature="fixed"
                 lockType={true}
                 initialData={editingTransaction}
             />

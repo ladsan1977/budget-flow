@@ -14,6 +14,7 @@ export interface Account {
     id: string;
     name: string;
     type: AccountType;
+    isDefault: boolean;
     userId: string;
     createdAt: string;
 }

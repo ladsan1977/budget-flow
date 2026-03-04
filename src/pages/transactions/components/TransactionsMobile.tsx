@@ -7,11 +7,11 @@ import type { TransactionsLogicReturn } from '../hooks/useTransactionsLogic';
 import { MobileDataCard } from '../../../components/ui/MobileDataCard';
 import { MonthSelector } from '../../../components/common/MonthSelector';
 
-const getBadgeVariant = (txType: TransactionType) => {
-    switch (txType) {
+const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 'variable' }) => {
+    switch (tx.type) {
         case 'income': return 'success';
-        case 'fixed': return 'primary'; // Indigo/Primary
-        case 'variable': return 'warning';
+        case 'expense': return tx.expenseNature === 'fixed' ? 'primary' : 'warning';
+        case 'transfer': return 'outline';
         default: return 'outline';
     }
 };
@@ -63,13 +63,13 @@ export function TransactionsMobile({
                             }
                             categoryName={category?.name || 'Uncategorized'}
                             date={tx.date}
-                            description={tx.description}
+                            description={tx.description || ""}
                             amount={tx.amount}
                             isIncome={tx.type === 'income'}
                             statusNode={
                                 <div className="flex gap-2 items-center">
-                                    <Badge variant={getBadgeVariant(tx.type)} className="text-[10px] px-1.5 py-0">
-                                        {tx.type === 'income' ? 'Income' : tx.type === 'fixed' ? 'Fixed Expenses' : tx.type === 'variable' ? 'Daily Budget' : tx.type}
+                                    <Badge variant={getBadgeVariant(tx)} className="text-[10px] px-1.5 py-0">
+                                        {tx.type === 'income' ? 'Income' : tx.type === 'expense' ? 'Expense' : 'Transfer'}
                                     </Badge>
                                     <button
                                         onClick={() => togglePaidStatus(tx.id, tx.isPaid)}

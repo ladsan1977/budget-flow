@@ -19,19 +19,19 @@ function computeStats(
         .reduce((sum, tx) => sum + tx.amount, 0);
 
     const totalFixedExpenses = transactions
-        .filter(tx => tx.type === 'fixed')
+        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'fixed')
         .reduce((sum, tx) => sum + tx.amount, 0);
 
     const totalVariableExpenses = transactions
-        .filter(tx => tx.type === 'variable')
+        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'variable')
         .reduce((sum, tx) => sum + tx.amount, 0);
 
     const paidFixedExpenses = transactions
-        .filter(tx => tx.type === 'fixed' && tx.isPaid)
+        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'fixed' && tx.isPaid)
         .reduce((sum, tx) => sum + tx.amount, 0);
 
     const paidVariableExpenses = transactions
-        .filter(tx => tx.type === 'variable' && tx.isPaid)
+        .filter(tx => tx.type === 'expense' && tx.expenseNature === 'variable' && tx.isPaid)
         .reduce((sum, tx) => sum + tx.amount, 0);
 
     const netFlow = totalIncome - totalFixedExpenses - totalVariableExpenses;
@@ -81,7 +81,7 @@ export function useDashboardStats(currentDate: Date) {
     const [txQuery, budgetQuery] = useQueries({
         queries: [
             {
-                queryKey: ['transactions', 'by-month', year, month, undefined, user?.id],
+                queryKey: ['transactions', 'by-month', year, month, undefined, undefined, user?.id],
                 queryFn: () => fetchTransactionsByMonth(currentDate),
                 enabled: !!user,
                 staleTime: 1 * 60 * 1000, // 1 minute

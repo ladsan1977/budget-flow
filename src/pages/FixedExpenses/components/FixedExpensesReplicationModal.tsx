@@ -76,7 +76,7 @@ export function FixedExpensesReplicationModal({
                                     <td className="px-6 py-3">
                                         <input
                                             type="text"
-                                            value={tx.description}
+                                            value={tx.description || ""}
                                             onChange={(e) => onDraftChange(tx.id, 'description', e.target.value)}
                                             className="w-full bg-transparent border-none focus:ring-0 p-0 font-medium text-slate-900 dark:text-slate-100"
                                             disabled={isPending}

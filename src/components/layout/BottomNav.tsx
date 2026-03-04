@@ -42,7 +42,7 @@ export function BottomNav() {
                         return (
                             <div key="center-action" className="relative -top-5">
                                 <button
-                                    onClick={() => openModal({ initialType: 'variable' })}
+                                    onClick={() => openModal({ initialType: 'expense', initialExpenseNature: 'variable' })}
                                     className="flex items-center justify-center w-14 h-14 bg-brand-primary text-white rounded-full shadow-lg shadow-brand-primary/30 hover:scale-105 transition-transform active:scale-95"
                                 >
                                     <Plus className="w-6 h-6" />

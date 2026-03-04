@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../../../components/ui/Button';
 import { cn } from '../../../lib/utils';
-import type { Category, TransactionType } from '../../../types';
+import type { Category } from '../../../types';
 import * as LucideIcons from 'lucide-react';
 import { resolveColor, PRESET_COLORS } from '../../../lib/colors';
 import { PRESET_ICONS } from '../../../lib/icons';
@@ -18,7 +18,7 @@ export interface CategoryFormProps {
 
 export function CategoryForm({ id, initialData, onSubmit, onCancel, isLoading }: CategoryFormProps) {
     const [name, setName] = useState(initialData?.name || '');
-    const [type, setType] = useState<TransactionType>(initialData?.type || 'variable');
+    const [type, setType] = useState<Category['type']>(initialData?.type || 'expense');
     const [icon, setIcon] = useState(initialData?.icon || getRandomItem(PRESET_ICONS));
     const [color, setColor] = useState(initialData?.color || getRandomItem(PRESET_COLORS));
 
@@ -46,9 +46,9 @@ export function CategoryForm({ id, initialData, onSubmit, onCancel, isLoading }:
 
                 <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-500">Type</label>
-                    <div className="grid grid-cols-3 gap-1 sm:gap-2 rounded-lg bg-slate-100 p-1 dark:bg-slate-900/50">
-                        {(['income', 'fixed', 'variable'] as const).map((t) => {
-                            const label = t === 'income' ? 'Income' : t === 'fixed' ? 'Fixed Expenses' : 'Daily Budget';
+                    <div className="grid grid-cols-2 gap-1 sm:gap-2 rounded-lg bg-slate-100 p-1 dark:bg-slate-900/50">
+                        {(['income', 'expense'] as const).map((t) => {
+                            const label = t === 'income' ? 'Income' : 'Expense';
                             return (
                                 <button
                                     key={t}
@@ -66,11 +66,6 @@ export function CategoryForm({ id, initialData, onSubmit, onCancel, isLoading }:
                             );
                         })}
                     </div>
-                    {type === 'variable' && (
-                        <p className="text-xs text-slate-500 dark:text-slate-400 px-1">
-                            For flexible day-to-day spending
-                        </p>
-                    )}
                 </div>
 
                 <div className="space-y-6">
@@ -78,12 +73,6 @@ export function CategoryForm({ id, initialData, onSubmit, onCancel, isLoading }:
                         <div className="flex items-start sm:items-center justify-between gap-2">
                             <label className="text-sm font-medium text-slate-500 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
                                 <span>Pick an Icon</span>
-                                {type === 'variable' && (
-                                    <span className="text-[10px] sm:text-[11px] font-normal text-brand-primary bg-brand-primary/10 px-2 py-0.5 rounded-full flex items-center w-fit">
-                                        <LucideIcons.Info className="w-3 h-3 mr-1" />
-                                        Counts towards monthly goal
-                                    </span>
-                                )}
                             </label>
                             <button
                                 type="button"

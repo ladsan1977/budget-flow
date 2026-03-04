@@ -13,7 +13,7 @@ export function useDashboardLogic() {
     const { user } = useAuth();
 
     const { data: stats, isLoading, error, refetch } = useDashboardStats(currentDate);
-    const { data: variableTransactions = [] } = useTransactionsByMonth('variable');
+    const { data: variableTransactions = [] } = useTransactionsByMonth('expense', 'variable');
     const { data: categories = [] } = useCategories();
 
 
@@ -49,7 +49,7 @@ export function useDashboardLogic() {
         const budgetLimit = stats.variableBudgetLimit;
 
         // Phase 1: accumulate totals per category with a Map — O(n)
-        const totalsMap = new Map<string, { totalAmount: number; firstDescription: string }>();
+        const totalsMap = new Map<string, { totalAmount: number; firstDescription: string | null }>();
         for (const tx of variableTransactions) {
             const key = tx.categoryId ?? '__uncategorized__';
             const existing = totalsMap.get(key);
