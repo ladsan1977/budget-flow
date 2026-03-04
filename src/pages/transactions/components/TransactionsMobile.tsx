@@ -1,12 +1,15 @@
+import React from 'react';
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { cn } from '../../../lib/utils';
 import { Plus, Edit2, X } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import type { TransactionType } from '../../../types';
 import type { TransactionsLogicReturn } from '../hooks/useTransactionsLogic';
 import { MobileDataCard } from '../../../components/ui/MobileDataCard';
 import { MonthSelector } from '../../../components/common/MonthSelector';
 import { TransactionFilters } from './TransactionFilters';
+import { resolveColor } from '../../../lib/colors';
 
 const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 'variable' }) => {
     switch (tx.type) {
@@ -51,9 +54,19 @@ export function TransactionsMobile({
                     return (
                         <MobileDataCard
                             key={tx.id}
-                            icon={
-                                <div className={cn("h-3 w-3 rounded-full", category?.color?.replace('text-', 'bg-') || 'bg-slate-400')} />
-                            }
+                            icon={(() => {
+                                const IconComponent = category?.icon
+                                    ? (LucideIcons as unknown as Record<string, React.ElementType>)[category.icon]
+                                    : LucideIcons.Tag;
+                                return (
+                                    <div
+                                        className="w-8 h-8 rounded-full flex items-center justify-center text-white shadow-sm shrink-0"
+                                        style={{ backgroundColor: resolveColor(category?.color) }}
+                                    >
+                                        <IconComponent className="h-4 w-4" />
+                                    </div>
+                                );
+                            })()}
                             categoryName={category?.name || 'Uncategorized'}
                             date={tx.date}
                             description={tx.description || ""}
