@@ -22,11 +22,8 @@ export function FlowCompositionCard({
 
     const fixedPaidPct = calcPct(paidFixed);
     const totalFixed = paidFixed + pendingFixed;
-    const totalFixedPct = calcPct(totalFixed);
-
     const varPaidPct = calcPct(paidVariable);
     const totalVar = paidVariable + pendingVariable;
-    const totalVarPct = calcPct(totalVar);
 
     return (
         <Card className="col-span-1 border-slate-200 dark:border-slate-800">
