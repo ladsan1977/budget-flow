@@ -80,7 +80,7 @@ export function VariableBreakdownCard({ breakdown, className }: VariableBreakdow
                 <Button
                     variant="ghost"
                     className="w-full text-brand-primary text-sm"
-                    onClick={() => navigate({ to: '/transactions' })}
+                    onClick={() => navigate({ to: '/transactions', search: { type: undefined } })}
                 >
                     View All Transactions
                 </Button>

@@ -53,7 +53,7 @@ export function DashboardDesktop({
                     <Button onClick={() => navigate({ to: '/reports' })} variant="outline" className="shrink-0">
                         Download Report
                     </Button>
-                    <Button onClick={() => navigate({ to: '/transactions' })} className="shrink-0">
+                    <Button onClick={() => navigate({ to: '/transactions', search: { type: undefined } })} className="shrink-0">
                         Add Transaction
                     </Button>
                 </div>
@@ -75,6 +75,7 @@ export function DashboardDesktop({
                             iconColor="text-brand-success"
                             description="Regular incoming cash flow"
                             className="border-brand-success/50 dark:border-brand-success/40"
+                            onClick={() => navigate({ to: '/transactions', search: { type: 'income' } })}
                         />
                         <StatCard
                             title="Fixed Expenses"
@@ -85,6 +86,7 @@ export function DashboardDesktop({
                             iconColor="text-brand-primary"
                             description="Scheduled & Regular"
                             className="border-brand-danger/50 dark:border-brand-danger/40"
+                            onClick={() => navigate({ to: '/transactions', search: { type: 'expense' } })}
                         />
                         <StatCard
                             title="Variable Expenses"
@@ -95,6 +97,7 @@ export function DashboardDesktop({
                             iconColor="text-brand-warning"
                             description="Discretionary spending"
                             className="border-brand-danger/50 dark:border-brand-danger/40"
+                            onClick={() => navigate({ to: '/transactions', search: { type: 'expense' } })}
                         />
                         <StatCard
                             title="Current Net Flow"

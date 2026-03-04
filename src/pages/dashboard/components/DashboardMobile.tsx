@@ -71,6 +71,7 @@ export function DashboardMobile({
                             iconColor="text-brand-success"
                             description="Regular incoming cash flow"
                             className="border-brand-success/50 dark:border-brand-success/40"
+                            onClick={() => navigate({ to: '/transactions', search: { type: 'income' } })}
                         />
                         <StatCard
                             title="Fixed Expenses"
@@ -81,6 +82,7 @@ export function DashboardMobile({
                             iconColor="text-brand-primary"
                             description="Scheduled & Regular"
                             className="border-brand-danger/50 dark:border-brand-danger/40"
+                            onClick={() => navigate({ to: '/transactions', search: { type: 'expense' } })}
                         />
                         <StatCard
                             title="Variable Expenses"
@@ -91,6 +93,7 @@ export function DashboardMobile({
                             iconColor="text-brand-warning"
                             description="Discretionary spending"
                             className="border-brand-danger/50 dark:border-brand-danger/40"
+                            onClick={() => navigate({ to: '/transactions', search: { type: 'expense' } })}
                         />
                         <StatCard
                             title="Current Net Flow"

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTransactionsByMonth } from '../../../hooks/useTransactions';
 import { useCategories } from '../../../hooks/useCategories';
 import { useDeleteTransaction, useUpdateTransaction } from '../../../hooks/useTransactionMutations';
+import { useTransactionFilters } from './useTransactionFilters';
 import type { Transaction } from '../../../types';
 
 export function useTransactionsLogic() {
@@ -16,28 +17,25 @@ export function useTransactionsLogic() {
 
     const sortedTransactions = useMemo(() => {
         return [...transactions].sort((a, b) => {
-            // Priority 1: Type (income -> fixed expenses -> variable expenses -> transfer)
-            const getTypeWeight = (tx: Transaction) => {
-                if (tx.type === 'income') return 0;
-                if (tx.type === 'expense') return tx.expenseNature === 'fixed' ? 1 : 2;
-                if (tx.type === 'transfer') return 3;
-                return 4;
-            };
-            const typeDiff = getTypeWeight(a) - getTypeWeight(b);
-            if (typeDiff !== 0) {
-                return typeDiff;
-            }
-
-            // Priority 2: Date ascending
+            // 1. Date ascending
             const dateA = new Date(a.date).getTime();
             const dateB = new Date(b.date).getTime();
-            const dateDiff = dateA - dateB;
-            if (dateDiff !== 0) return dateDiff;
+            if (dateA !== dateB) return dateA - dateB;
 
-            // Priority 3: Stable sort by ID
+            // 2. Type ascending (income → expense → transfer)
+            const typeOrder: Record<string, number> = { income: 0, expense: 1, transfer: 2 };
+            const typeDiff = (typeOrder[a.type] ?? 3) - (typeOrder[b.type] ?? 3);
+            if (typeDiff !== 0) return typeDiff;
+
+            // 3. Amount descending
+            if (b.amount !== a.amount) return b.amount - a.amount;
+
+            // 5. Stable sort by ID
             return a.id.localeCompare(b.id);
         });
     }, [transactions]);
+
+    const { filteredTransactions, filtersState } = useTransactionFilters(sortedTransactions);
 
     const confirmDeleteTransaction = () => {
         if (transactionToDelete) {
@@ -57,9 +55,10 @@ export function useTransactionsLogic() {
 
     return {
         data: {
-            transactions: sortedTransactions,
+            transactions: filteredTransactions,
             categories
         },
+        filters: filtersState,
         modals: {
             isAddModalOpen, setIsAddModalOpen,
             editingTransaction, setEditingTransaction,

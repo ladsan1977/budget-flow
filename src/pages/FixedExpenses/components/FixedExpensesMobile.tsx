@@ -63,7 +63,7 @@ export function FixedExpensesMobile({
                                     key={tx.id}
                                     icon={<Calendar className="h-3 w-3" />}
                                     categoryName={category?.name || 'Uncategorized'}
-                                    date={`${new Date(tx.date).getDate()}th`}
+                                    date={tx.date}
                                     description={tx.description || ""}
                                     amount={tx.amount}
                                     isIncome={false}

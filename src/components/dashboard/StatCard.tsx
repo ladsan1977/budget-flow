@@ -18,6 +18,8 @@ export interface StatCardProps {
     className?: string;
     bankAmount?: number;
     cashAmount?: number;
+    /** If provided, the icon becomes a clickable button navigating somewhere */
+    onClick?: () => void;
 }
 
 export function StatCard({
@@ -31,12 +33,28 @@ export function StatCard({
     className,
     bankAmount,
     cashAmount,
+    onClick,
 }: StatCardProps) {
     return (
         <Card className={cn("flex flex-col", className)}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                <Icon className={cn('h-4 w-4', iconColor)} />
+                {onClick ? (
+                    <button
+                        type="button"
+                        onClick={onClick}
+                        title={`View ${title} transactions`}
+                        className={cn(
+                            'h-7 w-7 flex items-center justify-center rounded-md transition-all',
+                            'hover:scale-110 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer',
+                            iconColor
+                        )}
+                    >
+                        <Icon className="h-4 w-4" />
+                    </button>
+                ) : (
+                    <Icon className={cn('h-4 w-4', iconColor)} />
+                )}
             </CardHeader>
             <CardContent className="flex flex-col flex-1 justify-between">
                 <div>
@@ -70,3 +88,4 @@ export function StatCard({
         </Card>
     );
 }
+

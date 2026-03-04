@@ -1,11 +1,12 @@
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { cn } from '../../../lib/utils';
-import { Plus, Search, Edit2, X } from 'lucide-react';
+import { Plus, Edit2, X } from 'lucide-react';
 import type { TransactionType } from '../../../types';
 import type { TransactionsLogicReturn } from '../hooks/useTransactionsLogic';
 import { MobileDataCard } from '../../../components/ui/MobileDataCard';
 import { MonthSelector } from '../../../components/common/MonthSelector';
+import { TransactionFilters } from './TransactionFilters';
 
 const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 'variable' }) => {
     switch (tx.type) {
@@ -18,6 +19,7 @@ const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 
 
 export function TransactionsMobile({
     data: { transactions, categories },
+    filters,
     modals: { setIsAddModalOpen, setEditingTransaction, setTransactionToDelete },
     actions: { togglePaidStatus }
 }: TransactionsLogicReturn) {
@@ -26,25 +28,16 @@ export function TransactionsMobile({
             {/* Header & Controls */}
             <div className="sticky top-16 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-4">
                 <div className="flex flex-col gap-4">
-                    <div>
+                    <div className="flex flex-row items-center justify-between gap-4">
                         <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                             Transactions
                         </h1>
-                    </div>
-                    <div className="flex gap-2 w-full">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
-                            <input
-                                type="search"
-                                placeholder="Search..."
-                                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-9 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary dark:border-slate-800 dark:bg-brand-surface dark:text-slate-100"
-                            />
-                        </div>
-                        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 shadow-lg shadow-brand-primary/20 shrink-0 inline-flex">
+                        <Button onClick={() => setIsAddModalOpen(true)} variant="outline" size="sm" className="shadow-lg shadow-brand-primary/20 shrink-0 gap-2 h-10 px-3">
                             <Plus className="h-4 w-4" />
-                            <span className="hidden sm:inline">Add Transaction</span>
+                            <span className="text-sm font-medium">Add</span>
                         </Button>
                     </div>
+                    <TransactionFilters filtersState={filters} />
                 </div>
                 <div className="flex justify-start w-full">
                     <MonthSelector />

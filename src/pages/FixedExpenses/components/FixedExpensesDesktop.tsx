@@ -49,7 +49,7 @@ export function FixedExpensesDesktop({
                         <thead className="bg-white border-b border-slate-100 text-slate-500 dark:bg-brand-surface dark:border-slate-800 dark:text-slate-400 sticky top-0 z-10">
                             <tr>
                                 <th className="px-6 py-4 font-medium">Category / Service</th>
-                                <th className="px-6 py-4 font-medium">Due Date</th>
+                                <th className="px-6 py-4 font-medium">Date</th>
                                 <th className="px-6 py-4 font-medium">Amount</th>
                                 <th className="px-6 py-4 font-medium">Status</th>
                                 <th className="px-6 py-4 font-medium text-right">Actions</th>
@@ -80,7 +80,7 @@ export function FixedExpensesDesktop({
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
-                                                {new Date(tx.date).getDate()}th
+                                                {tx.date}
                                             </td>
                                             <td className="px-6 py-4 font-bold text-slate-900 dark:text-slate-100 tabular-nums">
                                                 {formatCurrency(tx.amount)}

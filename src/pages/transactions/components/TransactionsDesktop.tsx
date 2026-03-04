@@ -2,9 +2,10 @@ import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Badge } from '../../../components/ui/Badge';
 import { formatCurrency, cn } from '../../../lib/utils';
-import { Plus, Search, Edit2, X } from 'lucide-react';
+import { Plus, Edit2, X } from 'lucide-react';
 import type { TransactionType } from '../../../types';
 import type { TransactionsLogicReturn } from '../hooks/useTransactionsLogic';
+import { TransactionFilters } from './TransactionFilters';
 
 const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 'variable' }) => {
     switch (tx.type) {
@@ -17,6 +18,7 @@ const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 
 
 export function TransactionsDesktop({
     data: { transactions, categories },
+    filters,
     modals: { setIsAddModalOpen, setEditingTransaction, setTransactionToDelete },
     actions: { togglePaidStatus }
 }: TransactionsLogicReturn) {
@@ -33,21 +35,12 @@ export function TransactionsDesktop({
                             Manage your income and expenses.
                         </p>
                     </div>
-                    <div className="flex gap-2 w-full md:w-auto">
-                        <div className="relative flex-1 md:flex-none">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
-                            <input
-                                type="search"
-                                placeholder="Search..."
-                                className="h-10 w-full md:w-[200px] rounded-lg border border-slate-200 bg-white px-9 py-2 text-sm outline-none focus:ring-2 focus:ring-brand-primary dark:border-slate-800 dark:bg-brand-surface dark:text-slate-100"
-                            />
-                        </div>
-                        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 shadow-lg shadow-brand-primary/20 shrink-0 inline-flex">
-                            <Plus className="h-4 w-4" />
-                            <span>Add Transaction</span>
-                        </Button>
-                    </div>
+                    <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 shadow-lg shadow-brand-primary/20 shrink-0 inline-flex">
+                        <Plus className="h-4 w-4" />
+                        <span>Add Transaction</span>
+                    </Button>
                 </div>
+                <TransactionFilters filtersState={filters} />
             </div>
 
             {/* Desktop Table Card */}
