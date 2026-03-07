@@ -15,6 +15,19 @@ export function formatCurrency(amount: number) {
 }
 
 /**
+ * Formats a currency value using compact notation for use in tight UI spaces.
+ * e.g. $8,598,253 → $8.6M | $258,000 → $258K | $1,234 → $1.2K
+ */
+export function formatCompactCurrency(amount: number) {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        notation: 'compact',
+        maximumFractionDigits: 1,
+    }).format(amount)
+}
+
+/**
  * Safely shifts a YYYY-MM-DD date to a target month.
  * If the original day exceeds the days in the target month (e.g. Jan 31 -> Feb),
  * it clamps the day to the last valid day of the target month (e.g. Feb 28).
