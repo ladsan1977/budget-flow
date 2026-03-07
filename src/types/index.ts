@@ -108,3 +108,17 @@ export interface CategoryBreakdown {
     /** Percentage of totalAmount relative to the global variable budget limit (0–100+). */
     percentOfBudget: number;
 }
+
+/**
+ * Aggregated financial data for a single month, used by the Trend Report chart.
+ */
+export interface MonthStat {
+    /** Short display label e.g. "Jan", "Feb" */
+    month: string;
+    /** Full "YYYY-MM" key for uniqueness and sorting */
+    monthKey: string;
+    income: number;
+    fixedExpenses: number;
+    variableExpenses: number;
+    netFlow: number;
+}
