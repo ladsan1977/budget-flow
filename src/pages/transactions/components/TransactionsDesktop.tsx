@@ -7,7 +7,7 @@ import type { TransactionType } from '../../../types';
 import type { TransactionsLogicReturn } from '../hooks/useTransactionsLogic';
 import { TransactionFilters } from './TransactionFilters';
 
-const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 'variable' }) => {
+const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 'variable' | null }) => {
     switch (tx.type) {
         case 'income': return 'success';
         case 'expense': return tx.expenseNature === 'fixed' ? 'primary' : 'warning';
