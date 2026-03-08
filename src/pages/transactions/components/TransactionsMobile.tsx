@@ -11,7 +11,7 @@ import { MonthSelector } from '../../../components/common/MonthSelector';
 import { TransactionFilters } from './TransactionFilters';
 import { resolveColor } from '../../../lib/colors';
 
-const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 'variable' }) => {
+const getBadgeVariant = (tx: { type: TransactionType; expenseNature?: 'fixed' | 'variable' | null }) => {
     switch (tx.type) {
         case 'income': return 'success';
         case 'expense': return tx.expenseNature === 'fixed' ? 'primary' : 'warning';

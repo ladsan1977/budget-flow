@@ -36,13 +36,13 @@ export interface Transaction {
     amount: number;
     date: string;
     description: string | null;
-    categoryId?: string;
+    categoryId?: string | null;
     accountId: string;      // Cuenta origen (obligatoria)
-    toAccountId?: string;   // Cuenta destino (solo transfers)
+    toAccountId?: string | null;   // Cuenta destino (solo transfers)
     account?: Account;
     toAccount?: Account;
     type: TransactionType;
-    expenseNature?: ExpenseNature; // Solo si type === 'expense'
+    expenseNature?: ExpenseNature | null; // Solo si type === 'expense'
     isPaid: boolean;
     userId: string;
     createdAt: string;

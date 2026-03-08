@@ -173,10 +173,10 @@ export function TransactionModal({ isOpen, onClose, initialType = 'expense', ini
             amount: parseFloat(amount),
             date,
             type,
-            categoryId: type === 'transfer' ? undefined : categoryId,
+            categoryId: type === 'transfer' ? null : categoryId,
             accountId,
-            toAccountId: type === 'transfer' ? toAccountId : undefined,
-            expenseNature: type === 'expense' ? (expenseNature || 'variable') : undefined,
+            toAccountId: type === 'transfer' ? toAccountId : null,
+            expenseNature: type === 'expense' ? (expenseNature || 'variable') : null,
             isPaid,
         };
 
