@@ -44,12 +44,26 @@ function computeStats(
     const paidVariableTxs = transactions.filter(tx => tx.type === 'expense' && tx.expenseNature === 'variable' && tx.isPaid);
     const paidVariableStats = sumByObj(paidVariableTxs);
 
+    const transferTxs = transactions.filter(tx => tx.type === 'transfer');
+    let transferFlowBank = 0;
+    let transferFlowCash = 0;
+
+    transferTxs.forEach(tx => {
+        // Deduct from source
+        if (tx.account?.type === 'bank') transferFlowBank -= tx.amount;
+        else if (tx.account?.type === 'cash') transferFlowCash -= tx.amount;
+
+        // Add to destination
+        if (tx.toAccount?.type === 'bank') transferFlowBank += tx.amount;
+        else if (tx.toAccount?.type === 'cash') transferFlowCash += tx.amount;
+    });
+
     const netFlow = incomeStats.total - fixedStats.total - variableStats.total;
 
     // Current Net Flow = Income Paid - Expenses Paid
     const actualNetFlow = paidIncomeStats.total - paidFixedStats.total - paidVariableStats.total;
-    const actualNetFlowBank = paidIncomeStats.bank - paidFixedStats.bank - paidVariableStats.bank;
-    const actualNetFlowCash = paidIncomeStats.cash - paidFixedStats.cash - paidVariableStats.cash;
+    const actualNetFlowBank = paidIncomeStats.bank - paidFixedStats.bank - paidVariableStats.bank + transferFlowBank;
+    const actualNetFlowCash = paidIncomeStats.cash - paidFixedStats.cash - paidVariableStats.cash + transferFlowCash;
 
     const variableBudgetLimit = budgets[0]?.amount ?? 0;
 
@@ -60,8 +74,8 @@ function computeStats(
 
     // Projected net flow = All Incomes - All Expenses (Paid and Pending)
     const projectedNetFlow = incomeStats.total - fixedStats.total - variableStats.total;
-    const projectedNetFlowBank = incomeStats.bank - fixedStats.bank - variableStats.bank;
-    const projectedNetFlowCash = incomeStats.cash - fixedStats.cash - variableStats.cash;
+    const projectedNetFlowBank = incomeStats.bank - fixedStats.bank - variableStats.bank + transferFlowBank;
+    const projectedNetFlowCash = incomeStats.cash - fixedStats.cash - variableStats.cash + transferFlowCash;
 
     const pendingFixedExpenses = fixedStats.total - paidFixedStats.total;
     const pendingVariableExpenses = variableStats.total - paidVariableStats.total;
