@@ -83,8 +83,8 @@ function computeStats(
     return {
         totalTransactions: transactions.length,
         totalIncome: incomeStats.total,
-        totalIncomeBank: incomeStats.bank,
-        totalIncomeCash: incomeStats.cash,
+        totalIncomeBank: incomeStats.bank + transferFlowBank,
+        totalIncomeCash: incomeStats.cash + transferFlowCash,
         totalFixedExpenses: fixedStats.total,
         totalFixedExpensesBank: fixedStats.bank,
         totalFixedExpensesCash: fixedStats.cash,
