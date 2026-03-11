@@ -1,94 +1,127 @@
-import { useState } from 'react';
-import { BarChart2 } from 'lucide-react';
-import { useTrendReport } from './hooks/useTrendReport';
-import { TrendChart } from './components/TrendChart';
-import { TrendSummaryCards } from './components/TrendSummaryCards';
+import { useState, useRef, useEffect } from 'react';
+import { BarChart2, TrendingUp, LineChart, ChevronDown, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { TrendReportView } from './views/TrendReportView';
+import { ProjectedCashFlowView } from './views/ProjectedCashFlowView';
+import { MonthSelector } from '../../components/common/MonthSelector';
 
-const RANGE_OPTIONS: { label: string; value: number }[] = [
-    { label: '3M', value: 3 },
-    { label: '6M', value: 6 },
-    { label: '12M', value: 12 },
+const REPORT_OPTIONS = [
+    { id: 'trend', label: 'Income vs. Expenses Trend', icon: TrendingUp },
+    { id: 'cashflow', label: 'Cash Flow Projection', icon: LineChart },
 ];
-
-const PERIOD_LABELS: Record<number, string> = {
-    3: '3 months',
-    6: '6 months',
-    12: '12 months',
-};
 
 /**
  * Reports page orchestrator.
- * Keeps all state (monthCount) and delegates data fetching to useTrendReport.
- * Renders skeleton placeholders while loading.
+ * Manages which report is currently selected and delegates rendering to specific view components.
  */
 export function ReportsPage() {
-    const [monthCount, setMonthCount] = useState(6);
-    const { data, totals, isLoading, error } = useTrendReport(monthCount);
+    const [selectedReportId, setSelectedReportId] = useState('trend');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const selectedReport = REPORT_OPTIONS.find(r => r.id === selectedReportId) || REPORT_OPTIONS[0];
+    const Icon = selectedReport.icon;
+
+    // Handle click outside to close dropdown
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsDropdownOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     return (
-        <div className="flex flex-col gap-6 animate-in fade-in duration-500">
+        <div className="flex flex-col gap-6 animate-in fade-in duration-500 pb-24 md:pb-0">
             {/* Page Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-2">
-                        <BarChart2 className="h-7 w-7 text-brand-primary" />
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                            Reports
-                        </h1>
+            <div className="sticky sm:static top-16 z-20 -mx-4 sm:mx-0 -mt-4 sm:mt-0 p-4 sm:p-0 mb-2 sm:mb-2 pb-4 sm:pb-0 bg-slate-50/90 dark:bg-brand-background/90 sm:bg-transparent sm:dark:bg-transparent backdrop-blur-md sm:backdrop-blur-none border-b border-slate-200/50 dark:border-slate-800/50 sm:border-none flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <BarChart2 className="h-7 w-7 text-brand-primary" />
+                            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                                Reports
+                            </h1>
+                        </div>
+                        <p className="text-slate-500 dark:text-slate-400 mt-1">
+                            Select a report to analyze your finances
+                        </p>
                     </div>
-                    <p className="text-slate-500 dark:text-slate-400 mt-1">
-                        Analyze your financial trends over time
-                    </p>
-                </div>
 
-                {/* Month Range Picker */}
-                <div className="flex items-center gap-1 p-1 rounded-lg bg-slate-100 dark:bg-slate-800 self-start sm:self-auto">
-                    {RANGE_OPTIONS.map((opt) => (
-                        <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => setMonthCount(opt.value)}
-                            className={cn(
-                                'px-4 py-1.5 rounded-md text-sm font-medium transition-all duration-200',
-                                monthCount === opt.value
-                                    ? 'bg-white dark:bg-brand-surface text-brand-primary shadow-sm'
-                                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        {/* Custom Report Selector */}
+                        <div className="relative w-full sm:w-72 shrink-0" ref={dropdownRef}>
+                            <button
+                                type="button"
+                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                className={cn(
+                                    "w-full flex items-center justify-between rounded-lg border bg-white dark:bg-slate-800 py-2.5 px-3 shadow-sm transition-colors focus:outline-none focus:ring-1 focus:ring-brand-primary",
+                                    isDropdownOpen
+                                        ? "border-brand-primary ring-1 ring-brand-primary text-slate-900 dark:text-slate-100"
+                                        : "border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
+                                )}
+                            >
+                                <div className="flex items-center gap-2 overflow-hidden">
+                                    <Icon className="h-4 w-4 shrink-0 text-brand-primary/80" />
+                                    <span className="truncate text-sm font-medium">{selectedReport.label}</span>
+                                </div>
+                                <ChevronDown className={cn(
+                                    "h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200",
+                                    isDropdownOpen && "rotate-180 text-brand-primary"
+                                )} />
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {isDropdownOpen && (
+                                <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1 shadow-lg ring-1 ring-black/5 animate-in fade-in zoom-in-95 duration-200">
+                                    {REPORT_OPTIONS.map((opt) => {
+                                        const OptionIcon = opt.icon;
+                                        const isSelected = selectedReportId === opt.id;
+                                        return (
+                                            <button
+                                                key={opt.id}
+                                                type="button"
+                                                onClick={() => {
+                                                    setSelectedReportId(opt.id);
+                                                    setIsDropdownOpen(false);
+                                                }}
+                                                className={cn(
+                                                    "relative flex w-full items-center gap-2 rounded-md py-2 pl-3 pr-9 text-sm outline-none transition-colors",
+                                                    isSelected
+                                                        ? "bg-brand-primary/10 text-brand-primary font-medium"
+                                                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50"
+                                                )}
+                                            >
+                                                <OptionIcon className={cn(
+                                                    "h-4 w-4 shrink-0",
+                                                    isSelected ? "text-brand-primary" : "text-slate-400 dark:text-slate-500"
+                                                )} />
+                                                <span className="truncate">{opt.label}</span>
+                                                {isSelected && (
+                                                    <span className="absolute right-3 flex h-full items-center justify-center text-brand-primary">
+                                                        <Check className="h-4 w-4" />
+                                                    </span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             )}
-                        >
-                            {opt.label}
-                        </button>
-                    ))}
+                        </div>
+
+                        {/* Month Selector */}
+                        <div className="flex justify-start sm:justify-end">
+                            <MonthSelector />
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Error State */}
-            {error && (
-                <div className="rounded-lg border border-brand-danger/30 bg-brand-danger/10 px-4 py-3 text-sm text-brand-danger">
-                    Failed to load report data. Please try again.
-                </div>
-            )}
-
-            {/* Summary Cards */}
-            {isLoading ? (
-                <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="h-28 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse"
-                        />
-                    ))}
-                </div>
-            ) : (
-                <TrendSummaryCards totals={totals} monthCount={monthCount} data={data} />
-            )}
-
-            {/* Trend Chart */}
-            {isLoading ? (
-                <div className="h-[420px] rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
-            ) : (
-                <TrendChart data={data} periodLabel={PERIOD_LABELS[monthCount]} />
-            )}
+            {/* Render Selected View */}
+            {selectedReportId === 'trend' && <TrendReportView />}
+            {selectedReportId === 'cashflow' && <ProjectedCashFlowView />}
         </div>
     );
 }
