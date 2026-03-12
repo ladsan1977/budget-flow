@@ -58,7 +58,7 @@ export function ProjectedCashFlowChart({ data }: Props) {
                             data={data}
                             margin={
                                 isMobile
-                                    ? { top: 20, right: 10, left: -15, bottom: 20 }
+                                    ? { top: 20, right: 10, left: 0, bottom: 20 }
                                     : { top: 20, right: 20, left: 10, bottom: 20 }
                             }
                         >
@@ -83,12 +83,21 @@ export function ProjectedCashFlowChart({ data }: Props) {
                             />
 
                             <YAxis
-                                tickFormatter={formatCompactCurrency}
-                                tick={{ fill: 'currentColor', fontSize: 11 }}
+                                tickFormatter={(value) => {
+                                    if (value === 0) return '$0';
+                                    return new Intl.NumberFormat('en-US', {
+                                        style: 'currency',
+                                        currency: 'USD',
+                                        notation: 'compact',
+                                        minimumFractionDigits: 1,
+                                        maximumFractionDigits: 1,
+                                    }).format(value);
+                                }}
+                                tick={{ fill: 'currentColor', fontSize: 10 }}
                                 className="text-slate-500 dark:text-slate-400"
                                 axisLine={true}
                                 tickLine={true}
-                                width={isMobile ? 40 : 60}
+                                width={isMobile ? 50 : 60}
                                 label={
                                     isMobile ? undefined : {
                                         value: 'Balance in Millions',
