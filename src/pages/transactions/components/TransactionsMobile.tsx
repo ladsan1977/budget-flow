@@ -29,21 +29,23 @@ export function TransactionsMobile({
     return (
         <div className="space-y-6 animate-in fade-in duration-500 md:hidden">
             {/* Header & Controls */}
-            <div className="sticky top-16 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-4 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-4">
-                <div className="flex flex-col gap-4">
-                    <div className="flex flex-row items-center justify-between gap-4">
-                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                            Transactions
-                        </h1>
-                        <Button onClick={() => setIsAddModalOpen(true)} variant="outline" size="sm" className="shadow-lg shadow-brand-primary/20 shrink-0 gap-2 h-10 px-3">
+            <div className="sticky top-16 z-20 -m-4 sm:-m-6 p-4 sm:p-6 pb-2 bg-slate-50/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 flex flex-col gap-3">
+                <div className="flex flex-col gap-3">
+                    <div className="flex flex-row items-center justify-between">
+                        <div className="flex flex-col">
+                            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                                Transactions
+                            </h1>
+                            <div className="scale-90 origin-left -mt-1">
+                                <MonthSelector />
+                            </div>
+                        </div>
+                        <Button onClick={() => setIsAddModalOpen(true)} variant="outline" size="sm" className="shadow-sm shrink-0 gap-1.5 h-9 px-3 border-brand-primary/30 text-brand-primary">
                             <Plus className="h-4 w-4" />
-                            <span className="text-sm font-medium">Add</span>
+                            <span className="text-xs font-semibold">Add</span>
                         </Button>
                     </div>
                     <TransactionFilters filtersState={filters} />
-                </div>
-                <div className="flex justify-start w-full">
-                    <MonthSelector />
                 </div>
             </div>
 
