@@ -58,9 +58,9 @@ export function TransactionFilters({ filtersState }: TransactionFiltersProps) {
             </div>
 
             {/* Filter Dropdowns row */}
-            <div className="flex flex-nowrap items-center gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex items-center gap-2 w-full flex-wrap sm:flex-nowrap">
                 <CustomDropdown
-                    className="w-32 sm:w-36 shrink-0"
+                    className="flex-1 sm:flex-none sm:w-36"
                     options={TYPE_OPTIONS}
                     value={filterType}
                     onChange={(val) => setFilterType(val as FilterType)}
@@ -68,7 +68,7 @@ export function TransactionFilters({ filtersState }: TransactionFiltersProps) {
                 />
 
                 <CustomDropdown
-                    className="w-32 sm:w-36 shrink-0"
+                    className="flex-1 sm:flex-none sm:w-36"
                     options={STATUS_OPTIONS}
                     value={filterStatus}
                     onChange={(val) => setFilterStatus(val as FilterStatus)}
@@ -76,7 +76,7 @@ export function TransactionFilters({ filtersState }: TransactionFiltersProps) {
 
                 {(filterType === 'all' || filterType === 'expense') && (
                     <CustomDropdown
-                        className="w-32 sm:w-40 shrink-0"
+                        className="flex-1 sm:flex-none sm:w-40"
                         options={NATURE_OPTIONS}
                         value={filterExpenseNature}
                         onChange={(val) => setFilterExpenseNature(val as FilterExpenseNature)}
@@ -88,10 +88,10 @@ export function TransactionFilters({ filtersState }: TransactionFiltersProps) {
                     <button
                         type="button"
                         onClick={clearFilters}
-                        className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors shrink-0 ml-2"
+                        className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-red-500 whitespace-nowrap ml-auto sm:ml-2"
                     >
                         <X className="h-3 w-3" />
-                        Clear filters
+                        Clear
                     </button>
                 )}
             </div>
