@@ -1,69 +1,36 @@
-import { Search, X } from 'lucide-react';
-import { cn } from '../../../lib/utils';
-import type { TransactionFiltersState, FilterType, FilterStatus } from '../hooks/useTransactionFilters';
+import { Search, X, Filter } from 'lucide-react';
+import { CustomDropdown } from '../../../components/ui/CustomDropdown';
+import type { TransactionFiltersState, FilterType, FilterStatus, FilterExpenseNature } from '../hooks/useTransactionFilters';
 
 interface TransactionFiltersProps {
     filtersState: TransactionFiltersState;
 }
 
-const TYPE_OPTIONS: { value: FilterType; label: string }[] = [
-    { value: 'all', label: 'All' },
-    { value: 'income', label: 'Income' },
-    { value: 'expense', label: 'Expense' },
-    { value: 'transfer', label: 'Transfer' },
+const TYPE_OPTIONS: { id: FilterType; label: string }[] = [
+    { id: 'all', label: 'All Types' },
+    { id: 'income', label: 'Income' },
+    { id: 'expense', label: 'Expense' },
+    { id: 'transfer', label: 'Transfer' },
 ];
 
-const STATUS_OPTIONS: { value: FilterStatus; label: string }[] = [
-    { value: 'all', label: 'All' },
-    { value: 'paid', label: 'Paid' },
-    { value: 'pending', label: 'Pending' },
+const STATUS_OPTIONS: { id: FilterStatus; label: string }[] = [
+    { id: 'all', label: 'All Statuses' },
+    { id: 'paid', label: 'Paid' },
+    { id: 'pending', label: 'Pending' },
 ];
 
-function FilterChip({
-    label,
-    isActive,
-    onClick,
-    activeClassName,
-}: {
-    label: string;
-    isActive: boolean;
-    onClick: () => void;
-    activeClassName: string;
-}) {
-    return (
-        <button
-            type="button"
-            onClick={onClick}
-            className={cn(
-                'inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold transition-all border',
-                isActive
-                    ? activeClassName
-                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
-            )}
-        >
-            {label}
-        </button>
-    );
-}
-
-const TYPE_ACTIVE_CLASSES: Record<FilterType, string> = {
-    all: 'border-brand-primary bg-brand-primary/10 text-brand-primary dark:border-brand-primary dark:bg-brand-primary/20',
-    income: 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-400',
-    expense: 'border-orange-400 bg-orange-50 text-orange-700 dark:border-orange-400 dark:bg-orange-900/30 dark:text-orange-400',
-    transfer: 'border-slate-500 bg-slate-100 text-slate-700 dark:border-slate-400 dark:bg-slate-700 dark:text-slate-300',
-};
-
-const STATUS_ACTIVE_CLASSES: Record<FilterStatus, string> = {
-    all: 'border-brand-primary bg-brand-primary/10 text-brand-primary dark:border-brand-primary dark:bg-brand-primary/20',
-    paid: 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:border-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-400',
-    pending: 'border-orange-400 bg-orange-50 text-orange-700 dark:border-orange-400 dark:bg-orange-900/30 dark:text-orange-400',
-};
+const NATURE_OPTIONS: { id: FilterExpenseNature; label: string }[] = [
+    { id: 'all', label: 'All Natures' },
+    { id: 'fixed', label: 'Fixed' },
+    { id: 'variable', label: 'Variable' },
+];
 
 export function TransactionFilters({ filtersState }: TransactionFiltersProps) {
     const {
         searchQuery, setSearchQuery,
         filterType, setFilterType,
         filterStatus, setFilterStatus,
+        filterExpenseNature, setFilterExpenseNature,
         clearFilters, hasActiveFilters,
     } = filtersState;
 
@@ -90,42 +57,38 @@ export function TransactionFilters({ filtersState }: TransactionFiltersProps) {
                 )}
             </div>
 
-            {/* Filter chips row */}
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                {/* Type filter */}
-                <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">Type:</span>
-                    {TYPE_OPTIONS.map((opt) => (
-                        <FilterChip
-                            key={opt.value}
-                            label={opt.label}
-                            isActive={filterType === opt.value}
-                            onClick={() => setFilterType(opt.value)}
-                            activeClassName={TYPE_ACTIVE_CLASSES[opt.value]}
-                        />
-                    ))}
-                </div>
+            {/* Filter Dropdowns row */}
+            <div className="flex flex-wrap items-center gap-3">
+                <CustomDropdown
+                    className="w-full sm:w-36"
+                    options={TYPE_OPTIONS}
+                    value={filterType}
+                    onChange={(val) => setFilterType(val as FilterType)}
+                    icon={Filter}
+                />
 
-                {/* Status filter */}
-                <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">Status:</span>
-                    {STATUS_OPTIONS.map((opt) => (
-                        <FilterChip
-                            key={opt.value}
-                            label={opt.label}
-                            isActive={filterStatus === opt.value}
-                            onClick={() => setFilterStatus(opt.value)}
-                            activeClassName={STATUS_ACTIVE_CLASSES[opt.value]}
-                        />
-                    ))}
-                </div>
+                <CustomDropdown
+                    className="w-full sm:w-36"
+                    options={STATUS_OPTIONS}
+                    value={filterStatus}
+                    onChange={(val) => setFilterStatus(val as FilterStatus)}
+                />
+
+                {(filterType === 'all' || filterType === 'expense') && (
+                    <CustomDropdown
+                        className="w-full sm:w-40"
+                        options={NATURE_OPTIONS}
+                        value={filterExpenseNature}
+                        onChange={(val) => setFilterExpenseNature(val as FilterExpenseNature)}
+                    />
+                )}
 
                 {/* Clear all */}
                 {hasActiveFilters && (
                     <button
                         type="button"
                         onClick={clearFilters}
-                        className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors ml-auto"
+                        className="inline-flex items-center gap-1 text-xs text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors ml-auto sm:ml-2"
                     >
                         <X className="h-3 w-3" />
                         Clear filters

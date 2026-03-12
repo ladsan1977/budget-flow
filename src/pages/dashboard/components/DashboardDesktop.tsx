@@ -86,7 +86,7 @@ export function DashboardDesktop({
                             iconColor="text-brand-primary"
                             description="Scheduled & Regular"
                             className="border-brand-danger/50 dark:border-brand-danger/40"
-                            onClick={() => navigate({ to: '/transactions', search: { type: 'expense' } })}
+                            onClick={() => navigate({ to: '/transactions', search: { type: 'expense', expenseNature: 'fixed' } })}
                         />
                         <StatCard
                             title="Variable Expenses"
@@ -97,7 +97,7 @@ export function DashboardDesktop({
                             iconColor="text-brand-warning"
                             description="Discretionary spending"
                             className="border-brand-danger/50 dark:border-brand-danger/40"
-                            onClick={() => navigate({ to: '/transactions', search: { type: 'expense' } })}
+                            onClick={() => navigate({ to: '/transactions', search: { type: 'expense', expenseNature: 'variable' } })}
                         />
                         <StatCard
                             title="Current Net Flow"
